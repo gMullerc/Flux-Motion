@@ -37,6 +37,18 @@ Um novo motion deve validar, quando aplicável:
 Motions contínuos também devem provar que repetem sem criar controllers extras
 ou deixar tickers ativos após a remoção do widget.
 
+## Orquestração
+
+Testes de `FluxSequence` devem montar o widget público, avançar a timeline e
+provar a ordem observável das etapas com effects reais de tipos diferentes.
+Testes de `FluxStagger` devem renderizar um grupo real e provar que os itens
+iniciam no intervalo e na ordem configurados.
+
+Quando `FluxMotionController` estiver presente, o teste deve chamar `play`,
+`stop`, `reset` e `replay` pelo controller conectado ao widget e observar o
+resultado na árvore. A remoção do componente precisa encerrar tickers e tornar
+comandos posteriores seguros, sem exceções.
+
 ## Testes matemáticos
 
 Specs, asserts, renders e interpolação podem ser testados isoladamente quando

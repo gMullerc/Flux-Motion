@@ -39,6 +39,10 @@ Engine (abstrata)
         └── [Módulo concreto] Preset + Component + Effect + Render
               └── FluxWrapper (pipeline)
                     └── child: Widget
+
+Timeline de grupo
+  └── FluxStagger + StaggerSpec
+        └── janelas de fade/offset por child
 ```
 
 ### Fluxo em runtime
@@ -49,19 +53,24 @@ Engine (abstrata)
 4. A cada frame, cada effect produz um **`MotionRender`** via `toRender()`.
 5. `FluxWrapper` recebe a lista na ordem e aplica com **`fold`** (sem `if` por tipo).
 6. O `child` original é renderizado com o pipeline aplicado.
+7. `FluxStagger` é o orquestrador de grupo: mantém uma timeline única e calcula
+   janelas locais para cada child, sem criar uma engine ou controller por item.
 
 ```mermaid
 flowchart TB
     subgraph public [API pública — por motion]
-        Component["FluxGlow / FluxShimmer / FluxShake / FluxPulse / FluxBounce"]
+        Component["FluxGlow / FluxShimmer / FluxSequence"]
+        Stagger["FluxStagger"]
         Preset["Preset específico do motion"]
         Spec["Spec específico do motion"]
+        StaggerSpec["StaggerSpec"]
     end
 
     subgraph base [Base]
         FluxMotion
         Engine["MotionEngine"]
         Wrapper["FluxWrapper"]
+        GroupTimeline["Timeline de grupo"]
     end
 
     subgraph effect [Effect — domínio da engine]
@@ -73,6 +82,9 @@ flowchart TB
     Preset --> Spec
     Spec --> Component
     Component --> FluxMotion
+    StaggerSpec --> Stagger
+    Stagger --> GroupTimeline
+    GroupTimeline --> Children["children: List<Widget>"]
     FluxMotion --> Engine
     Engine --> MotionEffect
     MotionEffect --> Driver
@@ -263,6 +275,16 @@ Centraliza animações **explicit** vs **intrinsic**.
 
 A engine escolhe com base em `effect.preferredDriver`.
 
+### FluxMotionController
+
+Controle imperativo opcional para os componentes `Flux*`. Expõe apenas intenções
+de alto nível — `play`, `stop`, `reset` e `replay` — e não entrega um
+`AnimationController` ao consumidor.
+
+O componente mantém a responsabilidade de conectar e desconectar o controller
+durante seu lifecycle. Assim, uma mesma intenção de produto pode iniciar uma
+sequence ou um stagger sem assumir ticker, listener ou `dispose`.
+
 ---
 
 ## Effects disponíveis (exemplos)
@@ -302,6 +324,17 @@ Render típico: `ShaderMask` ou `CustomPainter`.
 Os três compartilham a mesma engine, os mesmos triggers e a mesma regra de
 acessibilidade dos motions essenciais.
 
+### Orquestração
+
+- `FluxSequence` executa `MotionSequenceStep` na ordem definida por
+  `SequenceSpec.steps`. Cada etapa encapsula um effect público existente e a
+  timeline pode repetir ou alternar o sentido.
+- `FluxStagger` coordena um grupo de widgets. `StaggerSpec.interval` desloca o
+  início de cada item, enquanto duração, curva, offset, opacidade e ordem
+  permanecem declarativos.
+- `FluxMotionController` oferece controle externo opcional sem alterar a
+  propriedade do lifecycle e dos tickers.
+
 ---
 
 ## Estrutura de pacote
@@ -318,10 +351,13 @@ flutter_flux_motion/
 │   │   ├── drivers/
 │   │   ├── effects/
 │   │   └── widgets/
-│   └── motions/
-│       ├── fade/ … rotate/
-│       ├── blur/ … shimmer/
-│       └── shake/ … bounce/
+│   ├── motions/
+│   │   ├── fade/ … rotate/
+│   │   ├── blur/ … shimmer/
+│   │   └── shake/ … bounce/
+│   └── orchestration/
+│       ├── sequence/
+│       └── stagger/
 └── example/
     └── lib/catalog/             # uma página pública por motion
 ```
@@ -349,6 +385,10 @@ Composição possível de duas formas:
 1. **Lista manual** — `[GlowEffect(...), ShimmerEffect(...)]`
 2. **Preset composto** — ex.: `FadeSlidePreset.entrance()` reutiliza effects de módulos existentes
 
+Para composição temporal, `FluxSequence` agrupa effects em etapas ordenadas.
+Para composição espacial de um grupo, `FluxStagger` preserva o mesmo motion em
+cada item e desloca seus instantes de início.
+
 ---
 
 ## Regras de design acordadas
@@ -365,9 +405,9 @@ Composição possível de duas formas:
 
 ## Evolução planejada
 
-1. Evoluir composição e sequenciamento entre motions.
-2. Adicionar stagger declarativo para listas e grupos.
-3. Consolidar contratos de timeline, cancelamento e coordenação de triggers.
+1. Otimizar timelines longas, listas extensas e reconstruções por frame.
+2. Ampliar presets e motions mobile conforme cenários reais forem validados.
+3. Evoluir observabilidade, benchmarks e ferramentas de inspeção do catálogo.
 
 ---
 
@@ -376,7 +416,9 @@ Composição possível de duas formas:
 - Package Flutter com engine, drivers, effects e pipeline implementados.
 - Componentes públicos: `FluxFade`, `FluxSlide`, `FluxScale`, `FluxRotate`,
   `FluxBlur`, `FluxGlow`, `FluxShimmer`, `FluxShake`, `FluxPulse` e
-  `FluxBounce`.
+  `FluxBounce`, além dos orquestradores `FluxSequence` e `FluxStagger`.
+- Controle imperativo opcional por `FluxMotionController` com `play`, `stop`,
+  `reset` e `replay`.
 - Triggers mobile e acessibilidade por `MediaQuery.disableAnimations`.
 - Catálogo web responsivo com um arquivo de documentação por componente.
 - Testes de unidade e widget cobrindo engine e motions.

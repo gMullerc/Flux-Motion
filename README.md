@@ -29,10 +29,18 @@ FluxSlide(
 | `FluxShake` | Feedback corretivo por oscilação horizontal ou vertical |
 | `FluxPulse` | Ênfase e status por pulsação de escala |
 | `FluxBounce` | Feedback expressivo com deslocamento e acomodação |
+| `FluxSequence` | Timeline declarativa de effects executados em ordem |
+| `FluxStagger` | Entrada coordenada de grupos com intervalo entre itens |
 
-Todos os componentes compartilham a mesma engine, respeitam
-`MediaQuery.disableAnimations` e podem ser ativados por `onMount`, `onTap`,
-`onTapDown`, `onTapUp`, `onHover`, `onScroll` ou `onVisibility`.
+Todos os componentes respeitam `MediaQuery.disableAnimations` e compartilham o
+mesmo contrato de ativação por `onMount`, `onTap`, `onTapDown`, `onTapUp`,
+`onHover`, `onScroll` ou `onVisibility`. Motions de um único widget usam a
+engine comum; orquestradores coordenam a timeline sem expor tickers.
+
+Os componentes `Flux*` aceitam um `FluxMotionController` para controle
+imperativo com `play()`, `stop()`, `reset()` e `replay()`. Isso permite
+coordenar motions e timelines com o estado do produto sem expor
+`AnimationController` ao aplicativo.
 
 ## Catálogo visual
 

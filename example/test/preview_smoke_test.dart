@@ -6,7 +6,7 @@ import 'package:flutter_flux_motion_example/main.dart';
 
 void main() {
   test('every public motion has a complete catalog definition', () {
-    expect(motionCatalogs, hasLength(10));
+    expect(motionCatalogs, hasLength(12));
     expect(
       motionCatalogs.map((entry) => entry.id).toSet(),
       hasLength(motionCatalogs.length),
@@ -55,7 +55,7 @@ void main() {
       of: find.byType(Drawer),
       matching: find.byType(Scrollable),
     );
-    for (final id in ['shake', 'pulse', 'bounce']) {
+    for (final id in ['shake', 'pulse', 'bounce', 'sequence', 'stagger']) {
       final item = find.byKey(ValueKey('catalog-$id'));
       await tester.scrollUntilVisible(
         item,
