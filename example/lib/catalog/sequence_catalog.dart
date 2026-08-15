@@ -4,140 +4,282 @@ import 'package:flutter_flux_motion/flutter_flux_motion.dart';
 import 'catalog_entry.dart';
 import 'catalog_theme.dart';
 
-List<MotionSequenceStep> _entranceSteps() {
-  return <MotionSequenceStep>[
-    MotionSequenceStep(
-      effect: FadeEffect(
-        const FadeSpec(
-          duration: Duration(milliseconds: 280),
-          curve: Curves.easeOut,
+SequenceSpec _entranceSpec() {
+  return SequenceSpec(
+    steps: <MotionSequenceStep>[
+      MotionSequenceStep(
+        effect: FadeEffect(
+          const FadeSpec(
+            duration: Duration(milliseconds: 180),
+            curve: Curves.easeOut,
+          ),
         ),
       ),
-    ),
-    MotionSequenceStep(
-      effect: SlideEffect(
-        const SlideSpec(
-          begin: Offset(0, 18),
-          duration: Duration(milliseconds: 360),
-          curve: Curves.easeOutCubic,
+      MotionSequenceStep(
+        delay: const Duration(milliseconds: 40),
+        effect: SlideEffect(
+          const SlideSpec(
+            begin: Offset(0, 18),
+            duration: Duration(milliseconds: 260),
+            curve: Curves.easeOutCubic,
+          ),
         ),
       ),
-      delay: const Duration(milliseconds: 40),
-    ),
-  ];
+      MotionSequenceStep(
+        delay: const Duration(milliseconds: 80),
+        effect: PulseEffect(
+          const PulseSpec(
+            peakScale: 1.04,
+            duration: Duration(milliseconds: 320),
+          ),
+        ),
+      ),
+    ],
+  );
 }
 
-List<MotionSequenceStep> _confirmationSteps() {
-  return <MotionSequenceStep>[
-    MotionSequenceStep(
-      effect: ScaleEffect(
-        const ScaleSpec(
-          begin: .94,
-          duration: Duration(milliseconds: 180),
-          curve: Curves.easeOutBack,
+SequenceSpec _confirmationSpec() {
+  return SequenceSpec(
+    steps: <MotionSequenceStep>[
+      MotionSequenceStep(
+        effect: FadeEffect(
+          const FadeSpec(
+            begin: .2,
+            duration: Duration(milliseconds: 140),
+          ),
         ),
       ),
-    ),
-    MotionSequenceStep(
-      effect: RotateEffect(
-        const RotateSpec(
-          degrees: 12,
-          duration: Duration(milliseconds: 260),
-          curve: Curves.easeOutCubic,
+      MotionSequenceStep(
+        effect: ScaleEffect(
+          const ScaleSpec(
+            begin: .82,
+            duration: Duration(milliseconds: 180),
+            curve: Curves.easeOutBack,
+          ),
         ),
       ),
-      delay: const Duration(milliseconds: 30),
-    ),
-  ];
+      MotionSequenceStep(
+        delay: const Duration(milliseconds: 40),
+        effect: PulseEffect(
+          const PulseSpec(
+            peakScale: 1.08,
+            duration: Duration(milliseconds: 320),
+          ),
+        ),
+      ),
+    ],
+  );
 }
 
-List<MotionSequenceStep> _statusSteps() {
-  return <MotionSequenceStep>[
-    MotionSequenceStep(
-      effect: SlideEffect(
-        const SlideSpec(
-          begin: Offset(-16, 0),
-          duration: Duration(milliseconds: 300),
+SequenceSpec _errorRecoverySpec() {
+  return SequenceSpec(
+    steps: <MotionSequenceStep>[
+      MotionSequenceStep(
+        effect: ShakeEffect(
+          const ShakeSpec(
+            distance: 10,
+            oscillations: 3,
+            duration: Duration(milliseconds: 420),
+          ),
         ),
       ),
-    ),
-    MotionSequenceStep(
-      effect: FadeEffect(
-        const FadeSpec(
-          begin: .35,
-          duration: Duration(milliseconds: 240),
+      MotionSequenceStep(
+        // The delay belongs to this step: the UI rests for 220 ms after the
+        // shake and before the recovery pulse starts.
+        delay: const Duration(milliseconds: 220),
+        effect: PulseEffect(
+          const PulseSpec(
+            peakScale: 1.07,
+            duration: Duration(milliseconds: 360),
+          ),
         ),
       ),
-      delay: const Duration(milliseconds: 20),
-    ),
-  ];
+    ],
+  );
 }
 
 Widget _sequenceDefault(MotionTrigger trigger, Widget child) {
   return FluxSequence(
     trigger: trigger,
-    steps: _entranceSteps(),
+    spec: _entranceSpec(),
     child: child,
   );
 }
 
 Widget _sequenceEntrance(MotionTrigger trigger, Widget child) {
   return FluxSequence(
+    key: const ValueKey('sequence-entrance-preview'),
     trigger: trigger,
-    steps: _entranceSteps(),
+    spec: _entranceSpec(),
     child: child,
   );
 }
 
 Widget _sequenceConfirmation(MotionTrigger trigger, Widget child) {
   return FluxSequence(
+    key: const ValueKey('sequence-confirmation-preview'),
     trigger: trigger,
-    steps: _confirmationSteps(),
+    spec: _confirmationSpec(),
     child: child,
   );
 }
 
-Widget _sequenceStatus(MotionTrigger trigger, Widget child) {
+Widget _sequenceErrorRecovery(MotionTrigger trigger, Widget child) {
   return FluxSequence(
+    key: const ValueKey('sequence-error-recovery-preview'),
     trigger: trigger,
-    steps: _statusSteps(),
+    spec: _errorRecoverySpec(),
     child: child,
   );
+}
+
+Widget _sequenceTransport(MotionTrigger _, Widget __) {
+  return const _SequenceTransportPreview();
 }
 
 Widget _sequenceComposition(Widget child) {
   return FluxSequence(
+    spec: _entranceSpec(),
+    child: child,
+  );
+}
+
+class _SequenceTransportPreview extends StatefulWidget {
+  const _SequenceTransportPreview();
+
+  @override
+  State<_SequenceTransportPreview> createState() =>
+      _SequenceTransportPreviewState();
+}
+
+class _SequenceTransportPreviewState extends State<_SequenceTransportPreview> {
+  final FluxMotionController _controller = FluxMotionController();
+  late final SequenceSpec _spec = SequenceSpec(
     steps: <MotionSequenceStep>[
       MotionSequenceStep(
         effect: FadeEffect(
-          const FadeSpec(
-            duration: Duration(milliseconds: 260),
-            curve: Curves.easeOut,
-          ),
+          const FadeSpec(duration: Duration(milliseconds: 300)),
         ),
       ),
       MotionSequenceStep(
+        delay: const Duration(milliseconds: 100),
         effect: SlideEffect(
           const SlideSpec(
-            begin: Offset(0, 22),
-            duration: Duration(milliseconds: 380),
-            curve: Curves.easeOutCubic,
+            begin: Offset(0, 12),
+            duration: Duration(milliseconds: 500),
           ),
         ),
-        delay: Duration.zero,
       ),
     ],
-    child: child,
   );
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 188,
+      height: 116,
+      child: Column(
+        children: [
+          Expanded(
+            child: Center(
+              child: FluxSequence(
+                key: const ValueKey('sequence-controller-preview'),
+                controller: _controller,
+                trigger: MotionTrigger.onMount,
+                spec: _spec,
+                child: Container(
+                  key: const ValueKey('sequence-controller-target'),
+                  width: 88,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: CatalogColors.cyan.withAlpha(22),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: CatalogColors.cyan.withAlpha(150),
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: const Text(
+                    '900 MS',
+                    style: TextStyle(
+                      color: CatalogColors.cyan,
+                      fontFamily: 'monospace',
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: .8,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _TransportButton(
+                key: const ValueKey('sequence-controller-stop'),
+                tooltip: 'Stop on the current frame',
+                icon: Icons.pause_rounded,
+                onPressed: _controller.stop,
+              ),
+              const SizedBox(width: 6),
+              _TransportButton(
+                key: const ValueKey('sequence-controller-reset'),
+                tooltip: 'Reset to frame zero',
+                icon: Icons.stop_rounded,
+                onPressed: _controller.reset,
+              ),
+              const SizedBox(width: 6),
+              _TransportButton(
+                key: const ValueKey('sequence-controller-replay'),
+                tooltip: 'Replay from the beginning',
+                icon: Icons.replay_rounded,
+                onPressed: _controller.replay,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TransportButton extends StatelessWidget {
+  const _TransportButton({
+    super.key,
+    required this.tooltip,
+    required this.icon,
+    required this.onPressed,
+  });
+
+  final String tooltip;
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: tooltip,
+      onPressed: onPressed,
+      icon: Icon(icon, size: 16),
+      color: CatalogColors.cyan,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints.tightFor(width: 30, height: 30),
+      style: IconButton.styleFrom(
+        backgroundColor: CatalogColors.cyan.withAlpha(18),
+        side: BorderSide(color: CatalogColors.cyan.withAlpha(90)),
+      ),
+    );
+  }
 }
 
 const sequenceCatalog = MotionCatalogEntry(
   id: 'sequence',
   name: 'Sequence',
   category: 'Motion orchestration',
-  summary: 'Arrange existing effects on one deterministic mobile timeline.',
+  summary: 'Turn product feedback into one readable mobile timeline.',
   description:
-      'Sequence gives each effect an explicit start inside a shared timeline. It turns entrance, confirmation, and state-change choreography into immutable steps while one engine owns playback, cancellation, repetition, accessibility, and disposal.',
+      'Sequence runs existing effects one after another on the same child. Each step owns an effect and an optional gap before it; SequenceSpec computes the full timeline, while triggers or FluxMotionController decide when playback starts, stops, resets, or replays.',
   apiLabel:
       'FluxSequence / SequenceSpec / MotionSequenceStep / FluxMotionController',
   color: CatalogColors.cyan,
@@ -145,195 +287,256 @@ const sequenceCatalog = MotionCatalogEntry(
   builder: _sequenceDefault,
   examples: [
     CatalogExample(
-      title: 'Layered entrance',
+      title: 'Screen entrance choreography',
       description:
-          'Reveals the surface first, then settles it vertically into place.',
+          'Reveals a new surface, settles it vertically, then adds one quiet pulse so the next action reads clearly.',
       trigger: MotionTrigger.onMount,
-      instruction: 'Fade runs before slide',
+      instruction:
+          '180ms fade + 40ms gap + 260ms slide + 80ms gap + 320ms pulse = 880ms',
       builder: _sequenceEntrance,
-      icon: Icons.vertical_align_center_rounded,
+      icon: Icons.mobile_friendly_rounded,
     ),
     CatalogExample(
-      title: 'Tap confirmation',
+      title: 'Success confirmation',
       description:
-          'Scales a control, then rotates it to acknowledge a completed tap.',
+          'A completed action appears, lands, and breathes once using three distinct effects: Fade, Scale, and Pulse.',
       trigger: MotionTrigger.onTap,
-      instruction: 'Tap the preview',
+      instruction: 'Tap · 3 effects · total duration 680ms',
       builder: _sequenceConfirmation,
-      icon: Icons.touch_app_rounded,
+      icon: Icons.task_alt_rounded,
       circular: true,
     ),
     CatalogExample(
-      title: 'Status resolve',
+      title: 'Error to recovery',
       description:
-          'Coordinates lateral travel and opacity as soon as touch begins.',
+          'Touch-down starts an immediate Shake, holds a deliberate 220ms recovery gap, then plays a reassuring Pulse.',
       trigger: MotionTrigger.onTapDown,
-      instruction: 'Press the preview',
-      builder: _sequenceStatus,
-      icon: Icons.task_alt_rounded,
+      instruction: 'Press · 420ms error + 220ms gap + 360ms recovery = 1000ms',
+      builder: _sequenceErrorRecovery,
+      icon: Icons.error_outline_rounded,
+    ),
+    CatalogExample(
+      title: 'Controller transport',
+      description:
+          'An external FluxMotionController can freeze the current frame, restore frame zero, or replay the complete 900ms timeline.',
+      trigger: MotionTrigger.onMount,
+      instruction: 'Use pause, reset, and replay',
+      builder: _sequenceTransport,
+      icon: Icons.tune_rounded,
     ),
   ],
   parameters: [
     CatalogParameter(
-      name: 'effect',
+      name: 'MotionSequenceStep.effect',
       type: 'MotionEffect',
       defaultValue: 'required',
       description:
-          'Effect owned by a MotionSequenceStep and rendered on the shared child.',
+          'One existing effect, such as FadeEffect, SlideEffect, ShakeEffect, or PulseEffect, rendered on the shared child.',
     ),
     CatalogParameter(
-      name: 'delay',
+      name: 'MotionSequenceStep.delay',
       type: 'Duration',
       defaultValue: 'Duration.zero',
       description:
-          'Wait after the previous step finishes and before this effect starts.',
+          'Gap before this step starts. Because steps are sequential, that means waiting after the previous effect has finished.',
+    ),
+    CatalogParameter(
+      name: 'SequenceSpec.steps',
+      type: 'List<MotionSequenceStep>',
+      defaultValue: 'required',
+      description:
+          'Non-empty, immutable timeline order. Effects never overlap; each step starts after the preceding effect and its own delay.',
+    ),
+    CatalogParameter(
+      name: 'SequenceSpec.totalDuration',
+      type: 'Duration',
+      defaultValue: 'computed',
+      description:
+          'Read-only sum of every step delay plus every effect duration. Example: 420ms + 220ms + 360ms equals 1000ms.',
+    ),
+    CatalogParameter(
+      name: 'SequenceSpec.repeat',
+      type: 'bool',
+      defaultValue: 'false',
+      description: 'Restarts the complete timeline after its final step.',
+    ),
+    CatalogParameter(
+      name: 'SequenceSpec.reverse',
+      type: 'bool',
+      defaultValue: 'false',
+      description:
+          'Alternates timeline direction only while a repeating sequence runs.',
     ),
     CatalogParameter(
       name: 'spec',
       type: 'SequenceSpec?',
       defaultValue: 'null',
       description:
-          'Immutable timeline configuration; pass either spec or steps, never both.',
+          'Reusable timeline configuration. Pass either spec or inline steps, never both.',
     ),
     CatalogParameter(
       name: 'steps',
       type: 'List<MotionSequenceStep>?',
       defaultValue: 'null',
       description:
-          'Ergonomic inline alternative to spec; it must contain at least one step.',
-    ),
-    CatalogParameter(
-      name: 'repeat',
-      type: 'bool',
-      defaultValue: 'false',
-      description: 'Restarts the complete timeline after its final step.',
-    ),
-    CatalogParameter(
-      name: 'reverse',
-      type: 'bool',
-      defaultValue: 'false',
-      description:
-          'Alternates timeline direction while a repeating sequence runs.',
-    ),
-    CatalogParameter(
-      name: 'totalDuration',
-      type: 'Duration',
-      defaultValue: 'computed',
-      description:
-          'Read-only sum of every step delay and effect duration in SequenceSpec.',
+          'Inline alternative to spec for a local, non-empty sequence.',
     ),
     CatalogParameter(
       name: 'trigger',
       type: 'MotionTrigger',
       defaultValue: 'onMount',
       description:
-          'Public engine event that starts the sequence without a controller.',
+          'Starts the full timeline from a lifecycle or interaction event such as onMount, onTap, or onTapDown.',
     ),
     CatalogParameter(
       name: 'controller',
       type: 'FluxMotionController?',
       defaultValue: 'null',
       description:
-          'Optional play, stop, reset, and replay control owned outside the widget.',
+          'Optional imperative transport. One controller can be attached to one mounted Flux widget at a time.',
     ),
     CatalogParameter(
       name: 'controller.play()',
       type: 'void',
       defaultValue: 'detached no-op',
-      description: 'Starts the sequence through its configured trigger.',
+      description:
+          'Starts playback using the trigger configured by the attached FluxSequence.',
     ),
     CatalogParameter(
       name: 'controller.stop()',
       type: 'void',
       defaultValue: 'detached no-op',
-      description: 'Freezes playback at the current timeline frame.',
+      description: 'Freezes playback on the current timeline frame.',
     ),
     CatalogParameter(
       name: 'controller.reset()',
       type: 'void',
       defaultValue: 'detached no-op',
-      description: 'Stops playback and restores the first timeline frame.',
+      description:
+          'Stops playback and restores frame zero without starting again.',
     ),
     CatalogParameter(
       name: 'controller.replay()',
       type: 'void',
       defaultValue: 'detached no-op',
-      description: 'Restores frame zero and immediately starts again.',
+      description:
+          'Restores frame zero and immediately starts the complete timeline again.',
     ),
     CatalogParameter(
       name: 'controller.isAttached',
       type: 'bool',
       defaultValue: 'false',
-      description: 'Reports whether a mounted Flux widget owns the controller.',
+      description:
+          'Reports whether a mounted Flux widget currently owns the controller.',
     ),
     CatalogParameter(
       name: 'engineFactory',
       type: 'MotionEngine Function()',
       defaultValue: 'DefaultMotionEngine.new',
       description:
-          'Advanced dependency hook for the engine that owns sequence playback.',
+          'Advanced dependency hook for the engine that owns playback and disposal.',
     ),
     CatalogParameter(
       name: 'child',
       type: 'Widget',
       defaultValue: 'required',
-      description: 'Single stable widget that receives every sequenced effect.',
+      description:
+          'One stable widget that receives every effect in timeline order.',
     ),
   ],
   scenarios: [
     CatalogScenario(
-      title: 'Onboarding step',
+      title: 'Screen entrance',
       description:
-          'Reveal copy and settle the current instruction without visual overlap.',
-      example: 'Coach mark / first run',
-      icon: Icons.swipe_rounded,
+          'Reveal hierarchy in a predictable order when a route or sheet arrives.',
+      example: 'Checkout / onboarding',
+      icon: Icons.view_agenda_rounded,
     ),
     CatalogScenario(
-      title: 'Payment result',
+      title: 'Success feedback',
       description:
-          'Order acknowledgement, icon response, and final resting state.',
-      example: 'Checkout / transfer',
-      icon: Icons.payments_rounded,
+          'Turn completion into a short acknowledgement with a clear resting state.',
+      example: 'Payment / saved form',
+      icon: Icons.verified_rounded,
     ),
     CatalogScenario(
-      title: 'State transition',
+      title: 'Error and recovery',
       description:
-          'Coordinate exit and arrival cues when one mobile state replaces another.',
-      example: 'Empty / loaded / saved',
-      icon: Icons.swap_horiz_rounded,
+          'Separate the error signal from the retry cue with an intentional gap.',
+      example: 'Invalid field / retry',
+      icon: Icons.refresh_rounded,
     ),
     CatalogScenario(
-      title: 'Guided action',
+      title: 'Async status',
       description:
-          'Present an instruction before emphasizing its next available control.',
-      example: 'Permission / setup / form',
-      icon: Icons.assistant_direction_rounded,
+          'Replay or reset a timeline when loading, completion, or cancellation changes.',
+      example: 'Upload / sync / transfer',
+      icon: Icons.sync_rounded,
     ),
   ],
-  compositionLabel: 'Fade step → Slide step',
+  compositionLabel: 'Fade + Slide + Pulse',
   compositionBuilder: _sequenceComposition,
-  code: r'''final controller = FluxMotionController();
+  code:
+      r'''class TransferConfirmationState extends State<TransferConfirmation> {
+  final motion = FluxMotionController();
 
-FluxSequence(
-  controller: controller,
-  trigger: MotionTrigger.onTap,
-  spec: SequenceSpec(
+  late final confirmation = SequenceSpec(
     steps: [
       MotionSequenceStep(
         effect: FadeEffect(
-          const FadeSpec(duration: Duration(milliseconds: 280)),
+          const FadeSpec(duration: Duration(milliseconds: 140)),
         ),
       ),
       MotionSequenceStep(
+        effect: ScaleEffect(
+          const ScaleSpec(
+            begin: .82,
+            duration: Duration(milliseconds: 180),
+          ),
+        ),
+      ),
+      MotionSequenceStep(
+        // This is a 40ms gap after Scale and before Pulse.
         delay: const Duration(milliseconds: 40),
-        effect: SlideEffect(
-          const SlideSpec(begin: Offset(0, 18)),
+        effect: PulseEffect(
+          const PulseSpec(
+            peakScale: 1.08,
+            duration: Duration(milliseconds: 320),
+          ),
         ),
       ),
     ],
-  ),
-  child: const CheckoutResult(),
-);
+  ); // totalDuration: 680ms
 
-controller.replay();''',
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        FluxSequence(
+          controller: motion,
+          trigger: MotionTrigger.onTap,
+          spec: confirmation,
+          child: const TransferReceipt(),
+        ),
+        Text('${confirmation.totalDuration.inMilliseconds} ms'),
+        Wrap(
+          children: [
+            TextButton(
+              onPressed: motion.stop,
+              child: const Text('Pause'),
+            ),
+            TextButton(
+              onPressed: motion.reset,
+              child: const Text('Reset'),
+            ),
+            FilledButton(
+              onPressed: motion.replay,
+              child: const Text('Replay'),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}''',
 );

@@ -210,6 +210,42 @@ void main() {
     expect(hasLocalLayer(tester, (widget) => widget is Transform), isFalse);
   });
 
+  testWidgets('scroll start activates after layout without frame scheduling',
+      (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: FluxSequence(
+              trigger: MotionTrigger.onScroll,
+              steps: linearSteps(),
+              child: SizedBox(
+                key: childKey,
+                width: 180,
+                height: 56,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: const [SizedBox(width: 420, height: 56)],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(opacity(tester), closeTo(.2, tolerance));
+    tester
+        .state<ScrollableState>(find.byType(Scrollable).last)
+        .position
+        .jumpTo(80);
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(opacity(tester), closeTo(1, tolerance));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('removing a running sequence disposes its ticker',
       (tester) async {
     await tester.pumpWidget(sequence());

@@ -203,6 +203,76 @@ void main() {
   });
 
   testWidgets(
+      'overshooting curves keep opacity valid while preserving motion overshoot',
+      (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: FluxStagger(
+            spec: const StaggerSpec(
+              interval: Duration.zero,
+              itemDuration: Duration(milliseconds: 400),
+              curve: Curves.easeOutBack,
+              beginOffset: Offset(0, 32),
+            ),
+            children: items(1),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 320));
+
+    expect(opacity(tester, 0), inInclusiveRange(0.0, 1.0));
+    expect(
+      translation(tester, 0).dy,
+      lessThan(0),
+      reason: 'the translation should retain the easeOutBack overshoot',
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('scroll start activates the group outside the layout phase',
+      (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: FluxStagger(
+              key: staggerKey,
+              trigger: MotionTrigger.onScroll,
+              spec: spec(),
+              children: [
+                SizedBox(
+                  key: itemKey(0),
+                  width: 180,
+                  height: 56,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: const [SizedBox(width: 420, height: 56)],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(opacity(tester, 0), closeTo(.2, tolerance));
+    tester
+        .state<ScrollableState>(find.byType(Scrollable).last)
+        .position
+        .jumpTo(80);
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(opacity(tester, 0), closeTo(1, tolerance));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
       'changing children then removing a running stagger leaks no ticker',
       (tester) async {
     await tester.pumpWidget(stagger());

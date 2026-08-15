@@ -195,7 +195,8 @@ class _CatalogHero extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _CatalogTag(label: entry.apiLabel, color: entry.color),
+                  for (final apiName in entry.apiLabel.split(' / '))
+                    _CatalogTag(label: apiName, color: entry.color),
                   const _CatalogTag(label: 'MOBILE FIRST'),
                   const _CatalogTag(label: 'COMPOSABLE'),
                 ],
@@ -541,7 +542,7 @@ class _TriggerGallery extends StatelessWidget {
     ),
     (
       MotionTrigger.onScroll,
-      'After a scroll notification',
+      'When descendant scrolling starts',
       Icons.swap_vert_rounded
     ),
     (

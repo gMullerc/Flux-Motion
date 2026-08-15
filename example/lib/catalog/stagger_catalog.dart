@@ -10,65 +10,128 @@ Widget _staggerGroup({
   required IconData icon,
   required List<String> labels,
 }) {
-  return SizedBox(
-    width: 186,
-    child: FluxStagger(
-      trigger: trigger,
-      spec: spec,
-      children: <Widget>[
-        for (var index = 0; index < labels.length; index++)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 3),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: CatalogColors.panelRaised,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: CatalogColors.line),
-              ),
-              child: SizedBox(
-                height: 30,
-                child: Row(
-                  children: [
-                    const SizedBox(width: 9),
-                    Icon(icon, color: CatalogColors.blue, size: 14),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        labels[index],
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: CatalogColors.text,
-                          fontFamily: 'monospace',
-                          fontSize: 9,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: .3,
+  return LayoutBuilder(
+    builder: (context, constraints) => SizedBox(
+      width: constraints.maxWidth.clamp(0, 186).toDouble(),
+      child: FluxStagger(
+        trigger: trigger,
+        spec: spec,
+        children: <Widget>[
+          for (var index = 0; index < labels.length; index++)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: CatalogColors.panelRaised,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: CatalogColors.line),
+                ),
+                child: SizedBox(
+                  height: 27,
+                  child: Row(
+                    children: [
+                      const SizedBox(width: 9),
+                      Icon(icon, color: CatalogColors.blue, size: 13),
+                      const SizedBox(width: 7),
+                      Expanded(
+                        child: Text(
+                          labels[index],
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: CatalogColors.text,
+                            fontFamily: 'monospace',
+                            fontSize: 8.5,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: .25,
+                          ),
                         ),
                       ),
-                    ),
-                    Text(
-                      '0${index + 1}',
-                      style: const TextStyle(
-                        color: CatalogColors.muted,
-                        fontFamily: 'monospace',
-                        fontSize: 8,
+                      Text(
+                        '0${index + 1}',
+                        style: const TextStyle(
+                          color: CatalogColors.muted,
+                          fontFamily: 'monospace',
+                          fontSize: 8,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 9),
-                  ],
+                      const SizedBox(width: 9),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     ),
+  );
+}
+
+Widget _staggerActionGroup(MotionTrigger trigger) {
+  const actions = <(IconData, String)>[
+    (Icons.reply_rounded, 'SHARE'),
+    (Icons.bookmark_add_outlined, 'SAVE'),
+    (Icons.archive_outlined, 'ARCHIVE'),
+  ];
+
+  return FluxStagger(
+    trigger: trigger,
+    spec: const StaggerSpec(
+      interval: Duration(milliseconds: 70),
+      itemDuration: Duration(milliseconds: 320),
+      beginOffset: Offset(14, 0),
+      fadeFrom: .2,
+    ),
+    layoutBuilder: (context, children) => Row(
+      mainAxisSize: MainAxisSize.min,
+      children: children,
+    ),
+    children: <Widget>[
+      for (final action in actions)
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 3),
+          child: SizedBox(
+            width: 54,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: CatalogColors.blue.withAlpha(22),
+                    borderRadius: BorderRadius.circular(11),
+                    border: Border.all(
+                      color: CatalogColors.blue.withAlpha(110),
+                    ),
+                  ),
+                  child: SizedBox(
+                    width: 38,
+                    height: 38,
+                    child: Icon(action.$1, color: CatalogColors.blue, size: 17),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  action.$2,
+                  maxLines: 1,
+                  style: const TextStyle(
+                    color: CatalogColors.muted,
+                    fontFamily: 'monospace',
+                    fontSize: 7,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+    ],
   );
 }
 
 Widget _staggerDefault(MotionTrigger trigger, Widget _) {
   return _staggerGroup(
     trigger: trigger,
-    spec: const StaggerSpec(),
+    spec: const StaggerSpec(fadeFrom: .12),
     icon: Icons.layers_rounded,
     labels: const ['ACCOUNT', 'PREFERENCES', 'SECURITY'],
   );
@@ -100,17 +163,7 @@ Widget _staggerReverse(MotionTrigger trigger, Widget _) {
 }
 
 Widget _staggerActions(MotionTrigger trigger, Widget _) {
-  return _staggerGroup(
-    trigger: trigger,
-    spec: const StaggerSpec(
-      interval: Duration(milliseconds: 70),
-      itemDuration: Duration(milliseconds: 320),
-      beginOffset: Offset(18, 0),
-      fadeFrom: .25,
-    ),
-    icon: Icons.bolt_rounded,
-    labels: const ['SHARE', 'SAVE', 'ARCHIVE'],
-  );
+  return _staggerActionGroup(trigger);
 }
 
 Widget _staggerComposition(Widget _) {
@@ -139,9 +192,9 @@ const staggerCatalog = MotionCatalogEntry(
   id: 'stagger',
   name: 'Stagger',
   category: 'Group orchestration',
-  summary: 'Reveal mobile groups with a precise interval between items.',
+  summary: 'Reveal children on one shared timeline, one after another.',
   description:
-      'Stagger coordinates a real list of widgets on one shared clock. Each item receives the same fade and translation vocabulary, but starts in deterministic forward or reverse order so hierarchy appears without duplicating controllers or keys.',
+      'Stagger gives every child its own fade-and-offset window while one controller drives the whole group. The first item starts immediately, each next item waits interval, and total duration is itemDuration + interval × (children.length − 1). Reverse order changes who starts first without changing the widget list.',
   apiLabel: 'FluxStagger / StaggerSpec / StaggerOrder / FluxMotionController',
   color: CatalogColors.blue,
   icon: Icons.view_agenda_rounded,
@@ -150,27 +203,27 @@ const staggerCatalog = MotionCatalogEntry(
     CatalogExample(
       title: 'Feed arrival',
       description:
-          'Introduces three updates from top to bottom as one readable group.',
+          'Three feed rows share a 400 ms entrance; each row starts 90 ms after the previous one.',
       trigger: MotionTrigger.onMount,
-      instruction: 'Forward order on mount',
+      instruction: 'Forward · 90 ms interval · 580 ms total',
       builder: _staggerFeed,
       icon: Icons.dynamic_feed_rounded,
     ),
     CatalogExample(
       title: 'Reverse checklist',
       description:
-          'Reveals the last validation result first after a completed tap.',
+          'The visual list stays in place, but EMAIL starts first because order is reverse.',
       trigger: MotionTrigger.onTap,
-      instruction: 'Tap any row',
+      instruction: 'Tap · reverse order · left offset',
       builder: _staggerReverse,
       icon: Icons.rule_rounded,
     ),
     CatalogExample(
       title: 'Quick actions',
       description:
-          'Brings contextual actions in from the side as touch begins.',
+          'A custom layoutBuilder arranges the animated children horizontally instead of using the default Column.',
       trigger: MotionTrigger.onTapDown,
-      instruction: 'Press any row',
+      instruction: 'Press · custom Row layout · 70 ms interval',
       builder: _staggerActions,
       icon: Icons.touch_app_rounded,
     ),
@@ -180,13 +233,15 @@ const staggerCatalog = MotionCatalogEntry(
       name: 'interval',
       type: 'Duration',
       defaultValue: '80ms',
-      description: 'Delay between the start of two consecutive children.',
+      description:
+          'Start-time difference between consecutive children; it does not extend each item animation.',
     ),
     CatalogParameter(
       name: 'itemDuration',
       type: 'Duration',
       defaultValue: '420ms',
-      description: 'Independent entrance duration assigned to every child.',
+      description:
+          'Local fade-and-translation duration for each child after its own window begins.',
     ),
     CatalogParameter(
       name: 'curve',
@@ -211,7 +266,8 @@ const staggerCatalog = MotionCatalogEntry(
       name: 'order',
       type: 'StaggerOrder',
       defaultValue: 'forward',
-      description: 'Selects first-to-last or last-to-first reveal order.',
+      description:
+          'Chooses which child receives the earliest window; it never reorders the widget tree.',
     ),
     CatalogParameter(
       name: 'repeat',
@@ -230,7 +286,7 @@ const staggerCatalog = MotionCatalogEntry(
       type: 'List<Widget>',
       defaultValue: 'required',
       description:
-          'Stable group of widgets coordinated by the shared timeline.',
+          'Real widgets coordinated by the shared timeline; keys and input order are preserved.',
     ),
     CatalogParameter(
       name: 'trigger',
@@ -280,14 +336,14 @@ const staggerCatalog = MotionCatalogEntry(
       type: 'FluxStaggerLayoutBuilder?',
       defaultValue: 'null',
       description:
-          'Optional group layout; the default is a minimum-height vertical Column.',
+          'Builds the final group from animated children; defaults to a minimum-height vertical Column and can return Row, Wrap, or a custom layout.',
     ),
   ],
   scenarios: [
     CatalogScenario(
       title: 'Feed refresh',
       description:
-          'Introduce a small batch of new cards while preserving reading order.',
+          'Introduce a small inserted batch while preserving keys and reading order.',
       example: 'News / activity / social',
       icon: Icons.refresh_rounded,
     ),
@@ -329,11 +385,16 @@ FluxStagger(
     order: StaggerOrder.forward,
   ),
   children: const [
-    NotificationTile(),
-    NotificationTile(),
-    NotificationTile(),
+    NotificationTile(key: ValueKey('message')),
+    NotificationTile(key: ValueKey('order')),
+    NotificationTile(key: ValueKey('summary')),
   ],
+  layoutBuilder: (context, animatedChildren) => Column(
+    mainAxisSize: MainAxisSize.min,
+    children: animatedChildren,
+  ),
 );
 
+// Start from frame zero after data is inserted.
 controller.replay();''',
 );

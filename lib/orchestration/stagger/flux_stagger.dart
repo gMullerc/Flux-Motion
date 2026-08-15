@@ -51,6 +51,7 @@ class _FluxStaggerState extends State<FluxStagger>
   AnimationController? _timeline;
   bool? _animationsDisabled;
   bool _mountStarted = false;
+  bool _scrollScheduled = false;
   bool _visibilityScheduled = false;
 
   Duration get _totalDuration {
@@ -108,6 +109,7 @@ class _FluxStaggerState extends State<FluxStagger>
 
     if (timelineChanged || triggerChanged) {
       _mountStarted = false;
+      _scrollScheduled = false;
       _visibilityScheduled = false;
       _syncTimeline(reset: true);
       _startOnMountIfNeeded();
@@ -231,6 +233,22 @@ class _FluxStaggerState extends State<FluxStagger>
     });
   }
 
+  void _scheduleScrollStart() {
+    if (_scrollScheduled) {
+      return;
+    }
+
+    _scrollScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future<void>.delayed(Duration.zero, () {
+        _scrollScheduled = false;
+        if (mounted && widget.trigger == MotionTrigger.onScroll) {
+          _start(MotionTrigger.onScroll);
+        }
+      });
+    });
+  }
+
   Widget _withTrigger(Widget child) {
     switch (widget.trigger) {
       case MotionTrigger.onMount:
@@ -260,8 +278,10 @@ class _FluxStaggerState extends State<FluxStagger>
         );
       case MotionTrigger.onScroll:
         return NotificationListener<ScrollNotification>(
-          onNotification: (_) {
-            _start(MotionTrigger.onScroll);
+          onNotification: (notification) {
+            if (notification is ScrollStartNotification) {
+              _scheduleScrollStart();
+            }
             return false;
           },
           child: child,
@@ -310,8 +330,9 @@ class _FluxStaggerState extends State<FluxStagger>
     }
 
     final progress = widget.spec.curve.transform(rawProgress);
+    final opacityProgress = progress.clamp(0.0, 1.0).toDouble();
     final opacity =
-        widget.spec.fadeFrom + (1 - widget.spec.fadeFrom) * progress;
+        widget.spec.fadeFrom + (1 - widget.spec.fadeFrom) * opacityProgress;
     final offset = Offset.lerp(
       widget.spec.beginOffset,
       Offset.zero,

@@ -43,6 +43,7 @@ class FluxMotion extends StatefulWidget {
 class _FluxMotionState extends State<FluxMotion> with TickerProviderStateMixin {
   late MotionEngine _engine;
   bool _started = false;
+  bool _scrollScheduled = false;
   bool _visibilityScheduled = false;
 
   @override
@@ -75,6 +76,7 @@ class _FluxMotionState extends State<FluxMotion> with TickerProviderStateMixin {
       _engine.dispose();
       _engine = widget.engineFactory();
       _started = false;
+      _scrollScheduled = false;
       _visibilityScheduled = false;
       _rebindEngine();
       if (widget.trigger == MotionTrigger.onMount) {
@@ -122,12 +124,14 @@ class _FluxMotionState extends State<FluxMotion> with TickerProviderStateMixin {
   void _handleControllerReset() {
     _engine.reset();
     _started = false;
+    _scrollScheduled = false;
     _visibilityScheduled = false;
   }
 
   void _handleControllerReplay() {
     _engine.reset();
     _started = false;
+    _scrollScheduled = false;
     _visibilityScheduled = false;
     _start(widget.trigger);
   }
@@ -151,6 +155,22 @@ class _FluxMotionState extends State<FluxMotion> with TickerProviderStateMixin {
       if (mounted && widget.trigger == MotionTrigger.onVisibility) {
         _start(MotionTrigger.onVisibility);
       }
+    });
+  }
+
+  void _scheduleScrollStart() {
+    if (_scrollScheduled) {
+      return;
+    }
+
+    _scrollScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future<void>.delayed(Duration.zero, () {
+        _scrollScheduled = false;
+        if (mounted && widget.trigger == MotionTrigger.onScroll) {
+          _start(MotionTrigger.onScroll);
+        }
+      });
     });
   }
 
@@ -183,8 +203,10 @@ class _FluxMotionState extends State<FluxMotion> with TickerProviderStateMixin {
         );
       case MotionTrigger.onScroll:
         return NotificationListener<ScrollNotification>(
-          onNotification: (_) {
-            _start(MotionTrigger.onScroll);
+          onNotification: (notification) {
+            if (notification is ScrollStartNotification) {
+              _scheduleScrollStart();
+            }
             return false;
           },
           child: child,
