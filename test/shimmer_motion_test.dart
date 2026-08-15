@@ -7,6 +7,16 @@ import 'package:flutter_flux_motion/motions/shimmer/shimmer_render.dart';
 import 'package:flutter_flux_motion/motions/shimmer/shimmer_spec.dart';
 
 void main() {
+  const childKey = ValueKey('shimmer-child');
+
+  Widget tappableChild() {
+    return const Listener(
+      key: childKey,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(width: 120, height: 40),
+    );
+  }
+
   group('ShimmerSpec', () {
     test('uses mobile-friendly defaults', () {
       const spec = ShimmerSpec();
@@ -65,47 +75,122 @@ void main() {
     expect(render.stops[4], moreOrLessEquals(.7));
   });
 
-  testWidgets('FluxShimmer renders a ShaderMask around the child',
+  testWidgets('onTap moves the highlight only after the child is tapped',
       (tester) async {
+    final effect = ShimmerEffect(
+      const ShimmerSpec(
+        duration: Duration(milliseconds: 600),
+        curve: Curves.linear,
+        repeat: false,
+      ),
+      activation: MotionTrigger.onTap,
+    );
+
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: FluxShimmer(
-          spec: const ShimmerSpec(repeat: false),
-          child: const SizedBox(
-            key: ValueKey('shimmer-child'),
-            width: 120,
-            height: 40,
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: FluxShimmer(
+              trigger: MotionTrigger.onTap,
+              effects: <ShimmerEffect>[effect],
+              child: tappableChild(),
+            ),
           ),
         ),
       ),
     );
-    await tester.pump(const Duration(milliseconds: 300));
 
+    expect(effect.progress, 0);
     expect(find.byType(ShaderMask), findsOneWidget);
-    expect(find.byKey(const ValueKey('shimmer-child')), findsOneWidget);
+    expect(find.byKey(childKey), findsOneWidget);
     expect(
       tester.widget<ShaderMask>(find.byType(ShaderMask)).blendMode,
       BlendMode.srcATop,
     );
+
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(effect.progress, 0,
+        reason: 'elapsed time alone must not activate it');
+
+    await tester.tap(find.byKey(childKey));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(effect.progress, closeTo(.5, .01));
+    final activeMask = tester.widget<ShaderMask>(find.byType(ShaderMask));
+    final activeShader =
+        activeMask.shaderCallback(const Rect.fromLTWH(0, 0, 120, 40));
+    expect(activeShader, isNotNull);
+
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(effect.progress, 1);
+
+    await tester.tap(find.byKey(childKey));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(effect.progress, closeTo(.25, .01),
+        reason: 'a second tap must restart the shimmer pass');
   });
 
-  testWidgets('FluxShimmer respects disabled animations', (tester) async {
+  testWidgets('default shimmer repeats past one cycle and disposes its ticker',
+      (tester) async {
+    final motion = FluxShimmer(
+      child: const SizedBox(key: childKey, width: 120, height: 40),
+    );
+    final effect = motion.effects.single as ShimmerEffect;
+    final quarterCycle = Duration(
+      microseconds: effect.duration.inMicroseconds ~/ 4,
+    );
+
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(disableAnimations: true),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: FluxShimmer(
-            trigger: MotionTrigger.onMount,
-            child: const SizedBox(width: 120, height: 40),
+      MaterialApp(
+        home: Scaffold(body: Center(child: motion)),
+      ),
+    );
+
+    await tester.pump(effect.duration + quarterCycle);
+
+    expect(find.byType(ShaderMask), findsOneWidget);
+    expect(effect.progress, closeTo(.25, .01),
+        reason: 'the standard shimmer must restart after its first pass');
+
+    await tester.pumpWidget(const MaterialApp(home: SizedBox.shrink()));
+    await tester.pump(effect.duration * 2);
+
+    expect(tester.takeException(), isNull);
+    expect(tester.binding.transientCallbackCount, 0);
+  });
+
+  testWidgets('disableAnimations keeps the complete onTap widget static',
+      (tester) async {
+    final effect = ShimmerEffect(
+      const ShimmerSpec(
+        duration: Duration(milliseconds: 600),
+        repeat: false,
+      ),
+      activation: MotionTrigger.onTap,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MediaQuery(
+            data: const MediaQueryData(disableAnimations: true),
+            child: FluxShimmer(
+              trigger: MotionTrigger.onTap,
+              effects: <ShimmerEffect>[effect],
+              child: tappableChild(),
+            ),
           ),
         ),
       ),
     );
-    await tester.pump();
+
+    await tester.tap(find.byKey(childKey));
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.byType(ShaderMask), findsNothing);
-    expect(find.byType(SizedBox), findsOneWidget);
+    expect(find.byKey(childKey), findsOneWidget);
+    expect(effect.progress, 0);
   });
 }
