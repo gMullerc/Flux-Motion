@@ -61,5 +61,7 @@ flutter test
 flutter analyze
 ```
 
-Veja [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) para os contratos da engine e
-[docs/OVERVIEW.md](docs/OVERVIEW.md) para uma visão geral da biblioteca.
+Veja [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) para os contratos da engine,
+[docs/OVERVIEW.md](docs/OVERVIEW.md) para uma visão geral da biblioteca e
+[docs/TESTING.md](docs/TESTING.md) para os critérios obrigatórios de testes por
+cenários reais de widget.
