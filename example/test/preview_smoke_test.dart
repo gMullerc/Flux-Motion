@@ -6,7 +6,7 @@ import 'package:flutter_flux_motion_example/main.dart';
 
 void main() {
   test('every public motion has a complete catalog definition', () {
-    expect(motionCatalogs, hasLength(12));
+    expect(motionCatalogs, hasLength(15));
     expect(
       motionCatalogs.map((entry) => entry.id).toSet(),
       hasLength(motionCatalogs.length),
@@ -43,7 +43,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.text('MOTION COMPONENTS'), findsOneWidget);
+    expect(find.text('PUBLIC COMPONENTS'), findsOneWidget);
     expect(find.byKey(const ValueKey('catalog-fade')), findsOneWidget);
     expect(find.byKey(const ValueKey('catalog-slide')), findsOneWidget);
     expect(find.byKey(const ValueKey('catalog-scale')), findsOneWidget);
@@ -56,6 +56,15 @@ void main() {
       matching: find.byType(Scrollable),
     );
     for (final id in ['shake', 'pulse', 'bounce', 'sequence', 'stagger']) {
+      final item = find.byKey(ValueKey('catalog-$id'));
+      await tester.scrollUntilVisible(
+        item,
+        120,
+        scrollable: drawerScrollable,
+      );
+      expect(item, findsOneWidget);
+    }
+    for (final id in ['page-route', 'dialog', 'bottom-sheet']) {
       final item = find.byKey(ValueKey('catalog-$id'));
       await tester.scrollUntilVisible(
         item,

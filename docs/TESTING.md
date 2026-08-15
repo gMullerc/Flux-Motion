@@ -62,6 +62,18 @@ Todo motion público precisa de uma página própria no catálogo. O smoke test 
 `example` deve garantir que a entrada existe, possui exemplos, parâmetros,
 cenários e pode ser renderizada em viewport mobile.
 
+## Navegação
+
+Testes de navegação devem começar por uma ação real do usuário e atravessar o
+`Navigator`: tocar no launcher, observar um frame intermediário, chegar ao
+destino e executar pop ou dismiss pela interface. O resultado retornado pela
+rota deve ser validado pelo chamador.
+
+Dialogs e bottom sheets também precisam validar a barreira e o gesto de
+dismiss quando habilitados. Remover o host durante uma transição não pode
+deixar tickers ativos. Com `MediaQuery.disableAnimations`, a superfície deve
+ser apresentada sem transformação visual intermediária.
+
 ## Critério de conclusão
 
 Um motion só está pronto quando componente, testes de widget e documentação

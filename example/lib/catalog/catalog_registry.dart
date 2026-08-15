@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
 import 'blur_catalog.dart';
+import 'bottom_sheet_catalog.dart';
 import 'bounce_catalog.dart';
 import 'catalog_component_page.dart';
 import 'catalog_entry.dart';
 import 'catalog_theme.dart';
+import 'dialog_catalog.dart';
 import 'fade_catalog.dart';
 import 'glow_catalog.dart';
+import 'page_route_catalog.dart';
 import 'pulse_catalog.dart';
 import 'rotate_catalog.dart';
 import 'scale_catalog.dart';
@@ -30,6 +33,9 @@ final motionCatalogs = <MotionCatalogEntry>[
   bounceCatalog,
   sequenceCatalog,
   staggerCatalog,
+  pageRouteCatalog,
+  dialogCatalog,
+  bottomSheetCatalog,
 ];
 
 class CatalogRenderer extends StatefulWidget {
@@ -145,7 +151,7 @@ class _CatalogDrawer extends StatelessWidget {
             const _CatalogBrand(),
             const SizedBox(height: 32),
             const Text(
-              'MOTION COMPONENTS',
+              'PUBLIC COMPONENTS',
               style: TextStyle(
                 color: CatalogColors.coral,
                 fontFamily: 'monospace',
@@ -156,7 +162,7 @@ class _CatalogDrawer extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Choose a component to open its examples, parameters, triggers, and scenarios.',
+              'Choose a component to open its examples, parameters, activation contract, and scenarios.',
               style: TextStyle(
                 color: CatalogColors.muted,
                 fontSize: 13,

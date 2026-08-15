@@ -40,10 +40,13 @@ FluxScale(
 | Bounce | Sucesso, notificação e reação por deslocamento elástico |
 | Sequence | Timeline declarativa que executa effects em etapas ordenadas |
 | Stagger | Revelação coordenada de grupos com intervalo entre itens |
+| Page route | Push e pop coordenados com slide, fade, scale, fade-through e shared-axis |
+| Dialog | Apresentação modal com fade-scale, fade ou entrada vertical |
+| Bottom sheet | Superfície modal Material com ritmo de entrada e saída configurável |
 
-Cada módulo contém seu próprio `Spec`, `Effect`, `Render` e componente
-ergonômico `Flux*`. Glow, Shimmer, Shake, Pulse e Bounce também disponibilizam
-presets prontos para os cenários mobile mais recorrentes.
+Cada módulo de motion de widget contém seu próprio `Spec`, `Effect`, `Render` e
+componente ergonômico `Flux*`. Glow, Shimmer, Shake, Pulse e Bounce também
+disponibilizam presets prontos para os cenários mobile mais recorrentes.
 
 `FluxSequence` combina effects existentes em uma timeline por etapas.
 `FluxStagger` aplica o mesmo vocabulário visual a um grupo de widgets, alterando
@@ -51,6 +54,11 @@ apenas o início de cada item. Eles e os demais componentes `Flux*` podem ser
 acionados pelos triggers públicos ou controlados por `FluxMotionController`,
 que expõe `play`, `stop`, `reset` e `replay` sem transferir o lifecycle da
 animação ao consumidor.
+
+`FluxPageRoute`, `showFluxDialog` e `showFluxBottomSheet` formam a camada de
+navegação mobile. Ela não cria uma segunda engine: reutiliza as animações
+mantidas pelo `Navigator` e pelos componentes Material, preservando pop,
+resultados tipados, barreiras, drag e integração com rotas aninhadas.
 
 ## Fluxo em runtime
 
@@ -82,5 +90,8 @@ Cada página documenta o comportamento do motion, seus parâmetros, triggers,
 cenários reais, composição e um exemplo Dart copiável. Sequence e Stagger
 também possuem páginas independentes com timelines e grupos reais, assim como
 os demais componentes públicos.
+
+As APIs de navegação possuem páginas próprias com previews interativos de
+push/pop, abertura/fechamento modal, retorno de valores e redução de movimento.
 
 Para detalhes internos, veja [ARCHITECTURE.md](ARCHITECTURE.md).

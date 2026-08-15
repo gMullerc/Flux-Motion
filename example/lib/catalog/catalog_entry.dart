@@ -8,6 +8,10 @@ typedef CatalogMotionBuilder = Widget Function(
 
 typedef CatalogCompositionBuilder = Widget Function(Widget child);
 
+typedef CatalogExamplePreviewBuilder = Widget Function(Widget child);
+
+typedef CatalogSectionBuilder = Widget Function(Color color);
+
 /// Complete documentation contract for one public motion component.
 class MotionCatalogEntry {
   const MotionCatalogEntry({
@@ -23,10 +27,15 @@ class MotionCatalogEntry {
     required this.examples,
     required this.parameters,
     required this.scenarios,
-    required this.compositionLabel,
-    required this.compositionBuilder,
     required this.code,
-  });
+    this.compositionLabel,
+    this.compositionBuilder,
+    this.activation,
+    this.documentationSections = const [],
+  }) : assert(
+          (compositionLabel == null) == (compositionBuilder == null),
+          'compositionLabel and compositionBuilder must be provided together.',
+        );
 
   final String id;
   final String name;
@@ -40,8 +49,10 @@ class MotionCatalogEntry {
   final List<CatalogExample> examples;
   final List<CatalogParameter> parameters;
   final List<CatalogScenario> scenarios;
-  final String compositionLabel;
-  final CatalogCompositionBuilder compositionBuilder;
+  final String? compositionLabel;
+  final CatalogCompositionBuilder? compositionBuilder;
+  final CatalogCustomSection? activation;
+  final List<CatalogDocumentationSection> documentationSections;
   final String code;
 }
 
@@ -49,20 +60,69 @@ class CatalogExample {
   const CatalogExample({
     required this.title,
     required this.description,
-    required this.trigger,
     required this.instruction,
-    required this.builder,
     required this.icon,
+    this.trigger,
+    this.builder,
+    this.previewBuilder,
+    this.badge,
     this.circular = false,
+  }) : assert(
+          builder != null || previewBuilder != null,
+          'An example needs a motion builder or a custom preview builder.',
+        );
+
+  final String title;
+  final String description;
+  final MotionTrigger? trigger;
+  final String instruction;
+  final CatalogMotionBuilder? builder;
+  final CatalogExamplePreviewBuilder? previewBuilder;
+  final String? badge;
+  final IconData icon;
+  final bool circular;
+}
+
+class CatalogCustomSection {
+  const CatalogCustomSection({
+    required this.eyebrow,
+    required this.title,
+    required this.subtitle,
+    required this.builder,
+  });
+
+  final String eyebrow;
+  final String title;
+  final String subtitle;
+  final CatalogSectionBuilder builder;
+}
+
+class CatalogDocumentationSection {
+  const CatalogDocumentationSection({
+    required this.eyebrow,
+    required this.title,
+    required this.subtitle,
+    required this.items,
+  });
+
+  final String eyebrow;
+  final String title;
+  final String subtitle;
+  final List<CatalogDocumentationItem> items;
+}
+
+class CatalogDocumentationItem {
+  const CatalogDocumentationItem({
+    required this.title,
+    required this.description,
+    required this.label,
+    required this.icon,
   });
 
   final String title;
   final String description;
-  final MotionTrigger trigger;
-  final String instruction;
-  final CatalogMotionBuilder builder;
+  final String label;
   final IconData icon;
-  final bool circular;
 }
 
 class CatalogParameter {
