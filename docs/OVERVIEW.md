@@ -34,9 +34,10 @@ FluxScale(
 | Rotate | Estado, refresh e processamento por ângulo |
 | Blur | Privacidade, foco e revelação de conteúdo |
 | Glow | Status, seleção e destaque por halo externo |
+| Shimmer | Loading, skeleton e destaque por faixa de luz |
 
 Cada módulo contém seu próprio `Spec`, `Effect`, `Render` e componente
-ergonômico `Flux*`. Glow também disponibiliza presets prontos.
+ergonômico `Flux*`. Glow e Shimmer também disponibilizam presets prontos.
 
 ## Fluxo em runtime
 

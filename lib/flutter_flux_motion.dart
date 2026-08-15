@@ -36,3 +36,8 @@ export 'motions/blur/flux_blur.dart';
 export 'motions/blur/blur_effect.dart';
 export 'motions/blur/blur_render.dart';
 export 'motions/blur/blur_spec.dart';
+export 'motions/shimmer/flux_shimmer.dart';
+export 'motions/shimmer/shimmer_effect.dart';
+export 'motions/shimmer/shimmer_preset.dart';
+export 'motions/shimmer/shimmer_render.dart';
+export 'motions/shimmer/shimmer_spec.dart';
