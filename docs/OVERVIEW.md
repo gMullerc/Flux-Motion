@@ -35,9 +35,13 @@ FluxScale(
 | Blur | Privacidade, foco e revelação de conteúdo |
 | Glow | Status, seleção e destaque por halo externo |
 | Shimmer | Loading, skeleton e destaque por faixa de luz |
+| Shake | Erro, rejeição e atenção por oscilação controlada |
+| Pulse | Ênfase, toque e status por pulsação de escala |
+| Bounce | Sucesso, notificação e reação por deslocamento elástico |
 
 Cada módulo contém seu próprio `Spec`, `Effect`, `Render` e componente
-ergonômico `Flux*`. Glow e Shimmer também disponibilizam presets prontos.
+ergonômico `Flux*`. Glow, Shimmer, Shake, Pulse e Bounce também disponibilizam
+presets prontos para os cenários mobile mais recorrentes.
 
 ## Fluxo em runtime
 
@@ -64,5 +68,9 @@ O app em `example/` é a documentação visual da biblioteca. As definições fi
 em `example/lib/catalog/`, uma por componente, e são renderizadas por um
 template compartilhado. Isso mantém exemplos, parâmetros, cenários e código
 consistentes conforme a biblioteca cresce.
+
+Cada página documenta o comportamento do motion, seus parâmetros, triggers,
+cenários reais, composição e um exemplo Dart copiável. Shake, Pulse e Bounce
+usam páginas independentes, assim como os demais componentes públicos.
 
 Para detalhes internos, veja [ARCHITECTURE.md](ARCHITECTURE.md).

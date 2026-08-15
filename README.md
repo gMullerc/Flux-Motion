@@ -26,6 +26,9 @@ FluxSlide(
 | `FluxBlur` | Transições entre foco suave e nítido |
 | `FluxGlow` | Halo animado ao redor do widget completo |
 | `FluxShimmer` | Faixa de luz animada para loading e destaque |
+| `FluxShake` | Feedback corretivo por oscilação horizontal ou vertical |
+| `FluxPulse` | Ênfase e status por pulsação de escala |
+| `FluxBounce` | Feedback expressivo com deslocamento e acomodação |
 
 Todos os componentes compartilham a mesma engine, respeitam
 `MediaQuery.disableAnimations` e podem ser ativados por `onMount`, `onTap`,

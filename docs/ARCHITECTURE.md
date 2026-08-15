@@ -1,11 +1,11 @@
-# flutter_flux_motion — Checkpoint de Arquitetura
+# flutter_flux_motion — Arquitetura
 
-> Documento de checkpoint do planejamento realizado em julho/2026.
-> Descreve a visão, camadas e contratos acordados antes da implementação.
+> Documento vivo dos contratos, camadas e decisões de implementação da
+> biblioteca.
 
 ## Visão
 
-`flutter_flux_motion` será uma **biblioteca Flutter** que fornece componentes de motion para serem usados em qualquer projeto.
+`flutter_flux_motion` é uma **biblioteca Flutter** que fornece componentes de motion para serem usados em qualquer projeto.
 
 Princípio central: uma **engine configurável** que pode ser aplicada **por cima de qualquer `Widget`**, sem exigir que o consumidor substitua seus widgets existentes.
 
@@ -43,7 +43,7 @@ Engine (abstrata)
 
 ### Fluxo em runtime
 
-1. Componente concreto (`FluxGlow`, `FluxShimmer`, …) monta com preset ou spec customizada.
+1. Componente concreto (`FluxGlow`, `FluxShake`, …) monta com preset ou spec customizada.
 2. `FluxMotion` instancia a **engine** e registra a lista de **effects**.
 3. Engine faz `attach` → `play` → `tick` → `dispose`.
 4. A cada frame, cada effect produz um **`MotionRender`** via `toRender()`.
@@ -53,9 +53,9 @@ Engine (abstrata)
 ```mermaid
 flowchart TB
     subgraph public [API pública — por motion]
-        Component["FluxGlow / FluxShimmer"]
-        Preset["GlowPreset / ShimmerPreset"]
-        Spec["GlowSpec / ShimmerSpec"]
+        Component["FluxGlow / FluxShimmer / FluxShake / FluxPulse / FluxBounce"]
+        Preset["Preset específico do motion"]
+        Spec["Spec específico do motion"]
     end
 
     subgraph base [Base]
@@ -65,8 +65,8 @@ flowchart TB
     end
 
     subgraph effect [Effect — domínio da engine]
-        MotionEffect["GlowEffect / ShimmerEffect"]
-        MotionRender["GlowRender / ShimmerRender"]
+        MotionEffect["Effect concreto do motion"]
+        MotionRender["Render concreto do motion"]
         Driver["MotionDriver explicit / intrinsic"]
     end
 
@@ -223,7 +223,10 @@ Cada motion tem seu próprio preset, co-locado com effect e componente:
 
 ```
 motions/glow/glow_preset.dart   → GlowPreset.neon(), .soft(), .pulse()
-motions/shimmer/shimmer_preset.dart → ShimmerPreset.skeleton(), .cta()
+motions/shimmer/shimmer_preset.dart → ShimmerPreset.skeleton(), .accent()
+motions/shake/shake_preset.dart → ShakePreset.error(), .attention(), .vertical()
+motions/pulse/pulse_preset.dart → PulsePreset.emphasis(), .tap(), .status()
+motions/bounce/bounce_preset.dart → BouncePreset.success(), .notification(), .playful()
 ```
 
 Presets montam `Spec` ou `List<Effect>` **apenas daquele motion**.
@@ -262,11 +265,11 @@ A engine escolhe com base em `effect.preferredDriver`.
 
 ---
 
-## Effects planejados (exemplos)
+## Effects disponíveis (exemplos)
 
 ### Glow
 
-Personalizações previstas:
+Parâmetros principais:
 
 - Raio do brilho (`radius`)
 - Cor do brilho (`color`)
@@ -279,61 +282,53 @@ Render típico: `BoxShadow` via `DecoratedBox`.
 
 ### Shimmer
 
-Personalizações previstas:
+Parâmetros principais:
 
-- Duração de cada passada (`passDuration`)
-- Quantidade de repetições (`repeatCount`)
-- Intervalo entre passes
-- Largura do feixe
-- Ângulo
-- Cores (base / highlight)
+- Cores fora e dentro do feixe (`baseColor`, `highlightColor`)
+- Intensidade e largura relativa (`intensity`, `bandWidth`)
+- Direção (`ShimmerDirection`)
+- Duração e curva (`duration`, `curve`)
+- Repetição e alternância (`repeat`, `reverse`)
 
 Render típico: `ShaderMask` ou `CustomPainter`.
 
+### Motions de feedback
+
+- `Shake` oscila no eixo definido por `ShakeAxis` e sempre retorna ao repouso.
+- `Pulse` percorre um ciclo de escala e pode manter um status em repetição.
+- `Bounce` desloca na direção definida por `BounceDirection` e acomoda o child
+  com movimentos progressivamente menores.
+
+Os três compartilham a mesma engine, os mesmos triggers e a mesma regra de
+acessibilidade dos motions essenciais.
+
 ---
 
-## Estrutura de pacote proposta
+## Estrutura de pacote
 
 ```
 flutter_flux_motion/
 ├── docs/
-│   └── ARCHITECTURE.md          ← este documento
+│   ├── ARCHITECTURE.md
+│   └── OVERVIEW.md
 ├── lib/
 │   ├── flutter_flux_motion.dart # exports públicos
 │   ├── core/
 │   │   ├── engine/
-│   │   │   ├── motion_engine.dart
-│   │   │   └── default_motion_engine.dart
 │   │   ├── drivers/
-│   │   │   ├── motion_driver.dart
-│   │   │   ├── explicit_driver.dart
-│   │   │   └── implicit_driver.dart
 │   │   ├── effects/
-│   │   │   ├── motion_effect.dart
-│   │   │   └── motion_render.dart
 │   │   └── widgets/
-│   │       ├── flux_motion.dart
-│   │       └── flux_wrapper.dart
 │   └── motions/
-│       ├── glow/
-│       │   ├── glow_spec.dart
-│       │   ├── glow_effect.dart
-│       │   ├── glow_render.dart
-│       │   ├── glow_preset.dart
-│       │   └── glow_motion.dart
-│       └── shimmer/
-│           ├── shimmer_spec.dart
-│           ├── shimmer_effect.dart
-│           ├── shimmer_render.dart
-│           ├── shimmer_preset.dart
-│           └── shimmer_motion.dart
+│       ├── fade/ … rotate/
+│       ├── blur/ … shimmer/
+│       └── shake/ … bounce/
 └── example/
-    └── lib/main.dart            # showcase (substituir app demo atual)
+    └── lib/catalog/             # uma página pública por motion
 ```
 
 ---
 
-## Triggers previstos
+## Triggers disponíveis
 
 | Trigger | Comportamento |
 |---------|---------------|
@@ -370,9 +365,9 @@ Composição possível de duas formas:
 
 ## Evolução planejada
 
-1. Expandir os componentes essenciais já implementados com presets onde fizer sentido.
-2. Adicionar motions de feedback como shake, pulse e bounce.
-3. Evoluir composição, sequenciamento e stagger para listas.
+1. Evoluir composição e sequenciamento entre motions.
+2. Adicionar stagger declarativo para listas e grupos.
+3. Consolidar contratos de timeline, cancelamento e coordenação de triggers.
 
 ---
 
@@ -380,7 +375,8 @@ Composição possível de duas formas:
 
 - Package Flutter com engine, drivers, effects e pipeline implementados.
 - Componentes públicos: `FluxFade`, `FluxSlide`, `FluxScale`, `FluxRotate`,
-  `FluxBlur`, `FluxGlow` e `FluxShimmer`.
+  `FluxBlur`, `FluxGlow`, `FluxShimmer`, `FluxShake`, `FluxPulse` e
+  `FluxBounce`.
 - Triggers mobile e acessibilidade por `MediaQuery.disableAnimations`.
 - Catálogo web responsivo com um arquivo de documentação por componente.
 - Testes de unidade e widget cobrindo engine e motions.
@@ -397,9 +393,9 @@ Decisões registradas neste checkpoint:
 - Effects como entidades da engine (Glow, Shimmer, …) com specs personalizáveis.
 - Driver auxiliar para animações explicit vs intrinsic.
 
-## Checkpoint de implementação
+## Estado de implementação
 
-O núcleo descrito neste documento, os motions essenciais e Shimmer estão
-implementados, exportados pela API pública e cobertos por testes. Shimmer
-mantém o mesmo contrato de spec, effect, render, componente, presets e
-documentação visual.
+O núcleo descrito neste documento e os motions públicos estão implementados,
+exportados pela API pública e cobertos por testes de comportamento real. Cada
+motion mantém o mesmo contrato de spec, effect, render, componente e
+documentação visual; os módulos com cenários recorrentes também expõem presets.

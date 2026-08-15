@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 
 import 'blur_catalog.dart';
+import 'bounce_catalog.dart';
 import 'catalog_component_page.dart';
 import 'catalog_entry.dart';
 import 'catalog_theme.dart';
 import 'fade_catalog.dart';
 import 'glow_catalog.dart';
+import 'pulse_catalog.dart';
 import 'rotate_catalog.dart';
 import 'scale_catalog.dart';
+import 'shake_catalog.dart';
 import 'shimmer_catalog.dart';
 import 'slide_catalog.dart';
 
@@ -20,6 +23,9 @@ final motionCatalogs = <MotionCatalogEntry>[
   blurCatalog,
   glowCatalog,
   shimmerCatalog,
+  shakeCatalog,
+  pulseCatalog,
+  bounceCatalog,
 ];
 
 class CatalogRenderer extends StatefulWidget {
