@@ -16,6 +16,7 @@ final class FluxShake extends FluxMotion {
     ShakeSpec? spec,
     List<ShakeEffect>? effects,
     MotionTrigger trigger = MotionTrigger.onMount,
+    super.controller,
     super.engineFactory,
   })  : assert(
           spec == null || effects == null,

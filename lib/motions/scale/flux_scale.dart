@@ -14,6 +14,7 @@ class FluxScale extends FluxMotion {
     ScaleSpec? spec,
     List<ScaleEffect>? effects,
     MotionTrigger trigger = MotionTrigger.onMount,
+    super.controller,
     super.engineFactory,
   })  : assert(
           spec == null || effects == null,

@@ -16,6 +16,7 @@ final class FluxPulse extends FluxMotion {
     PulseSpec? spec,
     List<PulseEffect>? effects,
     MotionTrigger trigger = MotionTrigger.onMount,
+    super.controller,
     super.engineFactory,
   })  : assert(
           spec == null || effects == null,

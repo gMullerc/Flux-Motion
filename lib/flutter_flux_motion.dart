@@ -1,5 +1,6 @@
 library flutter_flux_motion;
 
+export 'core/controllers/flux_motion_controller.dart';
 export 'core/drivers/explicit_driver.dart'
     show ExplicitDriverBinding, ExplicitMotionEffect;
 export 'core/drivers/implicit_driver.dart';
@@ -56,3 +57,10 @@ export 'motions/bounce/bounce_effect.dart';
 export 'motions/bounce/bounce_preset.dart';
 export 'motions/bounce/bounce_render.dart';
 export 'motions/bounce/bounce_spec.dart';
+export 'orchestration/sequence/flux_sequence.dart';
+export 'orchestration/sequence/motion_sequence_step.dart';
+export 'orchestration/sequence/sequence_effect.dart';
+export 'orchestration/sequence/sequence_render.dart';
+export 'orchestration/sequence/sequence_spec.dart';
+export 'orchestration/stagger/flux_stagger.dart';
+export 'orchestration/stagger/stagger_spec.dart';

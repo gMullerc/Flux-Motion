@@ -14,6 +14,7 @@ class FluxSlide extends FluxMotion {
     SlideSpec? spec,
     List<SlideEffect>? effects,
     MotionTrigger trigger = MotionTrigger.onMount,
+    super.controller,
     super.engineFactory,
   })  : assert(
           spec == null || effects == null,

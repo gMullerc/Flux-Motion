@@ -15,6 +15,7 @@ class FluxShimmer extends FluxMotion {
     ShimmerSpec? spec,
     List<ShimmerEffect>? effects,
     MotionTrigger trigger = MotionTrigger.onMount,
+    super.controller,
     super.engineFactory,
   })  : assert(
           spec == null || effects == null,

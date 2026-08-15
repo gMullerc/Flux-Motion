@@ -16,6 +16,7 @@ final class FluxBounce extends FluxMotion {
     BounceSpec? spec,
     List<BounceEffect>? effects,
     MotionTrigger trigger = MotionTrigger.onMount,
+    super.controller,
     super.engineFactory,
   })  : assert(
           spec == null || effects == null,

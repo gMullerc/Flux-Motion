@@ -14,6 +14,7 @@ class FluxFade extends FluxMotion {
     FadeSpec? spec,
     List<FadeEffect>? effects,
     MotionTrigger trigger = MotionTrigger.onMount,
+    super.controller,
     super.engineFactory,
   })  : assert(
           spec == null || effects == null,

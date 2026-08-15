@@ -15,6 +15,7 @@ class FluxGlow extends FluxMotion {
     GlowSpec? spec,
     List<GlowEffect>? effects,
     MotionTrigger trigger = MotionTrigger.onMount,
+    super.controller,
     super.engineFactory,
   })  : assert(
           spec == null || effects == null,
