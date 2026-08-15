@@ -1,11 +1,11 @@
 {
-    "name": "example",
-    "short_name": "example",
+    "name": "Flux Motion Documentation v1",
+    "short_name": "Flux Motion",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#080A0F",
+    "theme_color": "#080A0F",
+    "description": "Mobile-first motion components for Flutter.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
