@@ -8,7 +8,7 @@ import 'package:flutter_flux_motion/motions/slide/flux_slide.dart';
 
 void main() {
   group('SlideSpec', () {
-    test('provides the phase one defaults', () {
+    test('provides the mobile defaults', () {
       const spec = SlideSpec();
 
       expect(spec.begin, const Offset(0, 24));

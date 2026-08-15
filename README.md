@@ -25,6 +25,7 @@ FluxSlide(
 | `FluxRotate` | Rotação em graus mantendo o widget no lugar |
 | `FluxBlur` | Transições entre foco suave e nítido |
 | `FluxGlow` | Halo animado ao redor do widget completo |
+| `FluxShimmer` | Faixa de luz animada para loading e destaque |
 
 Todos os componentes compartilham a mesma engine, respeitam
 `MediaQuery.disableAnimations` e podem ser ativados por `onMount`, `onTap`,

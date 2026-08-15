@@ -8,6 +8,7 @@ import 'fade_catalog.dart';
 import 'glow_catalog.dart';
 import 'rotate_catalog.dart';
 import 'scale_catalog.dart';
+import 'shimmer_catalog.dart';
 import 'slide_catalog.dart';
 
 /// The single source of truth used by navigation and screen rendering.
@@ -18,6 +19,7 @@ final motionCatalogs = <MotionCatalogEntry>[
   rotateCatalog,
   blurCatalog,
   glowCatalog,
+  shimmerCatalog,
 ];
 
 class CatalogRenderer extends StatefulWidget {

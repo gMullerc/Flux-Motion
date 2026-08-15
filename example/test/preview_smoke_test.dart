@@ -6,7 +6,7 @@ import 'package:flutter_flux_motion_example/main.dart';
 
 void main() {
   test('every public motion has a complete catalog definition', () {
-    expect(motionCatalogs, hasLength(6));
+    expect(motionCatalogs, hasLength(7));
     expect(
       motionCatalogs.map((entry) => entry.id).toSet(),
       hasLength(motionCatalogs.length),
@@ -50,6 +50,7 @@ void main() {
     expect(find.byKey(const ValueKey('catalog-rotate')), findsOneWidget);
     expect(find.byKey(const ValueKey('catalog-blur')), findsOneWidget);
     expect(find.byKey(const ValueKey('catalog-glow')), findsOneWidget);
+    expect(find.byKey(const ValueKey('catalog-shimmer')), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('catalog-rotate')));
     await tester.pump();

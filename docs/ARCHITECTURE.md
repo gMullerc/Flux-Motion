@@ -371,9 +371,8 @@ Composição possível de duas formas:
 ## Evolução planejada
 
 1. Expandir os componentes essenciais já implementados com presets onde fizer sentido.
-2. Implementar **Shimmer** para validar shader, direção e repetição contínua.
-3. Adicionar motions de feedback como shake, pulse e bounce.
-4. Evoluir composição, sequenciamento e stagger para listas.
+2. Adicionar motions de feedback como shake, pulse e bounce.
+3. Evoluir composição, sequenciamento e stagger para listas.
 
 ---
 
@@ -381,7 +380,7 @@ Composição possível de duas formas:
 
 - Package Flutter com engine, drivers, effects e pipeline implementados.
 - Componentes públicos: `FluxFade`, `FluxSlide`, `FluxScale`, `FluxRotate`,
-  `FluxBlur` e `FluxGlow`.
+  `FluxBlur`, `FluxGlow` e `FluxShimmer`.
 - Triggers mobile e acessibilidade por `MediaQuery.disableAnimations`.
 - Catálogo web responsivo com um arquivo de documentação por componente.
 - Testes de unidade e widget cobrindo engine e motions.
@@ -400,7 +399,7 @@ Decisões registradas neste checkpoint:
 
 ## Checkpoint de implementação
 
-O núcleo descrito neste documento e os motions essenciais estão implementados,
-exportados pela API pública e cobertos por testes. O próximo módulo planejado é
-Shimmer, mantendo o mesmo contrato de spec, effect, render, componente e
+O núcleo descrito neste documento, os motions essenciais e Shimmer estão
+implementados, exportados pela API pública e cobertos por testes. Shimmer
+mantém o mesmo contrato de spec, effect, render, componente, presets e
 documentação visual.
