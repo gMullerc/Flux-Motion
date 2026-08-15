@@ -6,7 +6,7 @@ import 'package:flutter_flux_motion_example/main.dart';
 
 void main() {
   test('every public motion has a complete catalog definition', () {
-    expect(motionCatalogs, hasLength(6));
+    expect(motionCatalogs, hasLength(12));
     expect(
       motionCatalogs.map((entry) => entry.id).toSet(),
       hasLength(motionCatalogs.length),
@@ -50,16 +50,30 @@ void main() {
     expect(find.byKey(const ValueKey('catalog-rotate')), findsOneWidget);
     expect(find.byKey(const ValueKey('catalog-blur')), findsOneWidget);
     expect(find.byKey(const ValueKey('catalog-glow')), findsOneWidget);
+    expect(find.byKey(const ValueKey('catalog-shimmer')), findsOneWidget);
+    final drawerScrollable = find.descendant(
+      of: find.byType(Drawer),
+      matching: find.byType(Scrollable),
+    );
+    for (final id in ['shake', 'pulse', 'bounce', 'sequence', 'stagger']) {
+      final item = find.byKey(ValueKey('catalog-$id'));
+      await tester.scrollUntilVisible(
+        item,
+        120,
+        scrollable: drawerScrollable,
+      );
+      expect(item, findsOneWidget);
+    }
 
-    await tester.tap(find.byKey(const ValueKey('catalog-rotate')));
+    await tester.tap(find.byKey(const ValueKey('catalog-bounce')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 350));
 
     expect(
-        find.text('Turn a widget around its center while it stays in place.'),
+        find.text('Travel and settle with spring-like directional feedback.'),
         findsOneWidget);
-    expect(find.text('beginDegrees'), findsOneWidget);
-    expect(find.text('degrees'), findsOneWidget);
+    expect(find.text('direction'), findsOneWidget);
+    expect(find.text('distance'), findsOneWidget);
   });
 
   testWidgets('catalog fits a mobile viewport', (tester) async {

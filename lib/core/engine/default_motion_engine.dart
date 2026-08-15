@@ -16,6 +16,7 @@ class DefaultMotionEngine implements MotionEngine {
   VoidCallback? _onRequestRebuild;
   final List<AnimationController> _controllers = [];
   final List<ExplicitDriverBinding> _bindings = [];
+  final Map<MotionEffect, AnimationController> _effectControllers = {};
 
   /// Called before [bind] so the engine knows accessibility and rebuild hooks.
   void configure({
@@ -42,6 +43,7 @@ class DefaultMotionEngine implements MotionEngine {
           duration: effect.duration,
         );
         _controllers.add(controller);
+        _effectControllers[effect] = controller;
 
         _bindings.add(
           ExplicitDriverBinding(
@@ -82,6 +84,22 @@ class DefaultMotionEngine implements MotionEngine {
   }
 
   @override
+  void reset() {
+    for (final controller in _controllers) {
+      controller.stop();
+      controller.value = 0;
+    }
+
+    for (final effect in _effects) {
+      if (!_effectControllers.containsKey(effect)) {
+        effect.tick(Duration.zero);
+      }
+    }
+
+    _onRequestRebuild?.call();
+  }
+
+  @override
   void dispose() {
     for (final effect in _effects) {
       effect.dispose();
@@ -100,6 +118,7 @@ class DefaultMotionEngine implements MotionEngine {
       controller.dispose();
     }
     _controllers.clear();
+    _effectControllers.clear();
   }
 
   @override

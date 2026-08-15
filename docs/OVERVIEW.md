@@ -34,23 +34,37 @@ FluxScale(
 | Rotate | Estado, refresh e processamento por ângulo |
 | Blur | Privacidade, foco e revelação de conteúdo |
 | Glow | Status, seleção e destaque por halo externo |
+| Shimmer | Loading, skeleton e destaque por faixa de luz |
+| Shake | Erro, rejeição e atenção por oscilação controlada |
+| Pulse | Ênfase, toque e status por pulsação de escala |
+| Bounce | Sucesso, notificação e reação por deslocamento elástico |
+| Sequence | Timeline declarativa que executa effects em etapas ordenadas |
+| Stagger | Revelação coordenada de grupos com intervalo entre itens |
 
 Cada módulo contém seu próprio `Spec`, `Effect`, `Render` e componente
-ergonômico `Flux*`. Glow também disponibiliza presets prontos.
+ergonômico `Flux*`. Glow, Shimmer, Shake, Pulse e Bounce também disponibilizam
+presets prontos para os cenários mobile mais recorrentes.
+
+`FluxSequence` combina effects existentes em uma timeline por etapas.
+`FluxStagger` aplica o mesmo vocabulário visual a um grupo de widgets, alterando
+apenas o início de cada item. Eles e os demais componentes `Flux*` podem ser
+acionados pelos triggers públicos ou controlados por `FluxMotionController`,
+que expõe `play`, `stop`, `reset` e `replay` sem transferir o lifecycle da
+animação ao consumidor.
 
 ## Fluxo em runtime
 
 ```text
-Widget do app
+Widget ou grupo do app
   → componente Flux + spec
-  → FluxMotion
-  → MotionEngine
-  → pipeline de MotionRender
-  → widget animado
+  ├─ FluxMotion → MotionEngine → pipeline de MotionRender
+  └─ FluxStagger → timeline única → janelas por item
+  → widget(s) animado(s)
 ```
 
 A engine não conhece efeitos concretos. Cada effect produz seu render e o
-`FluxWrapper` aplica a lista na ordem declarada.
+`FluxWrapper` aplica a lista na ordem declarada. `FluxStagger` não cria um
+controller por filho: uma timeline calcula o progresso local de todo o grupo.
 
 ## Ativação
 
@@ -63,5 +77,10 @@ O app em `example/` é a documentação visual da biblioteca. As definições fi
 em `example/lib/catalog/`, uma por componente, e são renderizadas por um
 template compartilhado. Isso mantém exemplos, parâmetros, cenários e código
 consistentes conforme a biblioteca cresce.
+
+Cada página documenta o comportamento do motion, seus parâmetros, triggers,
+cenários reais, composição e um exemplo Dart copiável. Sequence e Stagger
+também possuem páginas independentes com timelines e grupos reais, assim como
+os demais componentes públicos.
 
 Para detalhes internos, veja [ARCHITECTURE.md](ARCHITECTURE.md).

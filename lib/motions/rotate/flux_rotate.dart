@@ -14,6 +14,7 @@ class FluxRotate extends FluxMotion {
     RotateSpec? spec,
     List<RotateEffect>? effects,
     MotionTrigger trigger = MotionTrigger.onMount,
+    super.controller,
     super.engineFactory,
   })  : assert(
           spec == null || effects == null,

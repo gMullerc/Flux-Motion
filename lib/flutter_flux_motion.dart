@@ -1,5 +1,6 @@
 library flutter_flux_motion;
 
+export 'core/controllers/flux_motion_controller.dart';
 export 'core/drivers/explicit_driver.dart'
     show ExplicitDriverBinding, ExplicitMotionEffect;
 export 'core/drivers/implicit_driver.dart';
@@ -36,3 +37,30 @@ export 'motions/blur/flux_blur.dart';
 export 'motions/blur/blur_effect.dart';
 export 'motions/blur/blur_render.dart';
 export 'motions/blur/blur_spec.dart';
+export 'motions/shimmer/flux_shimmer.dart';
+export 'motions/shimmer/shimmer_effect.dart';
+export 'motions/shimmer/shimmer_preset.dart';
+export 'motions/shimmer/shimmer_render.dart';
+export 'motions/shimmer/shimmer_spec.dart';
+export 'motions/shake/flux_shake.dart';
+export 'motions/shake/shake_effect.dart';
+export 'motions/shake/shake_preset.dart';
+export 'motions/shake/shake_render.dart';
+export 'motions/shake/shake_spec.dart';
+export 'motions/pulse/flux_pulse.dart';
+export 'motions/pulse/pulse_effect.dart';
+export 'motions/pulse/pulse_preset.dart';
+export 'motions/pulse/pulse_render.dart';
+export 'motions/pulse/pulse_spec.dart';
+export 'motions/bounce/flux_bounce.dart';
+export 'motions/bounce/bounce_effect.dart';
+export 'motions/bounce/bounce_preset.dart';
+export 'motions/bounce/bounce_render.dart';
+export 'motions/bounce/bounce_spec.dart';
+export 'orchestration/sequence/flux_sequence.dart';
+export 'orchestration/sequence/motion_sequence_step.dart';
+export 'orchestration/sequence/sequence_effect.dart';
+export 'orchestration/sequence/sequence_render.dart';
+export 'orchestration/sequence/sequence_spec.dart';
+export 'orchestration/stagger/flux_stagger.dart';
+export 'orchestration/stagger/stagger_spec.dart';

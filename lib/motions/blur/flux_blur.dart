@@ -14,6 +14,7 @@ class FluxBlur extends FluxMotion {
     BlurSpec? spec,
     List<BlurEffect>? effects,
     MotionTrigger trigger = MotionTrigger.onMount,
+    super.controller,
     super.engineFactory,
   })  : assert(
           spec == null || effects == null,

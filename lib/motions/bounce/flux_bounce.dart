@@ -1,18 +1,20 @@
 // The trigger is intentionally local because it also configures the generated
-// ScaleEffect before being forwarded to FluxMotion.
+// BounceEffect before being forwarded to FluxMotion.
 // ignore_for_file: use_super_parameters
 import '../../core/triggers/motion_trigger.dart';
 import '../../core/widgets/flux_motion.dart';
-import 'scale_effect.dart';
-import 'scale_spec.dart';
+import 'bounce_effect.dart';
+import 'bounce_preset.dart';
+import 'bounce_spec.dart';
 
-/// Ergonomic widget for applying a [ScaleEffect] to any child.
-class FluxScale extends FluxMotion {
-  FluxScale({
+/// Ergonomic widget for applying a [BounceEffect] to any child.
+final class FluxBounce extends FluxMotion {
+  /// Creates a bounce from one [spec] or a custom list of [effects].
+  FluxBounce({
     super.key,
     required super.child,
-    ScaleSpec? spec,
-    List<ScaleEffect>? effects,
+    BounceSpec? spec,
+    List<BounceEffect>? effects,
     MotionTrigger trigger = MotionTrigger.onMount,
     super.controller,
     super.engineFactory,
@@ -22,9 +24,9 @@ class FluxScale extends FluxMotion {
         ),
         super(
           effects: effects ??
-              <ScaleEffect>[
-                ScaleEffect(
-                  spec ?? const ScaleSpec(),
+              <BounceEffect>[
+                BounceEffect(
+                  spec ?? BouncePreset.success(),
                   activation: trigger,
                 ),
               ],

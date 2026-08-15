@@ -1,18 +1,20 @@
 // The trigger is intentionally local because it also configures the generated
-// ScaleEffect before being forwarded to FluxMotion.
+// ShakeEffect before being forwarded to FluxMotion.
 // ignore_for_file: use_super_parameters
 import '../../core/triggers/motion_trigger.dart';
 import '../../core/widgets/flux_motion.dart';
-import 'scale_effect.dart';
-import 'scale_spec.dart';
+import 'shake_effect.dart';
+import 'shake_preset.dart';
+import 'shake_spec.dart';
 
-/// Ergonomic widget for applying a [ScaleEffect] to any child.
-class FluxScale extends FluxMotion {
-  FluxScale({
+/// Ergonomic widget for applying a [ShakeEffect] to any child.
+final class FluxShake extends FluxMotion {
+  /// Creates a shake from one [spec] or a custom list of [effects].
+  FluxShake({
     super.key,
     required super.child,
-    ScaleSpec? spec,
-    List<ScaleEffect>? effects,
+    ShakeSpec? spec,
+    List<ShakeEffect>? effects,
     MotionTrigger trigger = MotionTrigger.onMount,
     super.controller,
     super.engineFactory,
@@ -22,9 +24,9 @@ class FluxScale extends FluxMotion {
         ),
         super(
           effects: effects ??
-              <ScaleEffect>[
-                ScaleEffect(
-                  spec ?? const ScaleSpec(),
+              <ShakeEffect>[
+                ShakeEffect(
+                  spec ?? ShakePreset.error(),
                   activation: trigger,
                 ),
               ],

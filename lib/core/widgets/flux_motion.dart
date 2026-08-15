@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import '../controllers/flux_motion_controller.dart';
 import '../effects/motion_effect.dart';
 import '../engine/default_motion_engine.dart';
 import '../engine/motion_engine.dart';
@@ -16,12 +17,23 @@ class FluxMotion extends StatefulWidget {
     required this.child,
     required this.effects,
     this.trigger = MotionTrigger.onMount,
+    this.controller,
     this.engineFactory = DefaultMotionEngine.new,
   });
 
+  /// Widget transformed by the render pipeline.
   final Widget child;
+
+  /// Effects bound to the motion engine in pipeline order.
   final List<MotionEffect> effects;
+
+  /// Interaction or lifecycle event that starts the effects.
   final MotionTrigger trigger;
+
+  /// Optional imperative controller for playback operations.
+  final FluxMotionController? controller;
+
+  /// Factory used to create the engine that owns effect playback.
   final MotionEngine Function() engineFactory;
 
   @override
@@ -31,12 +43,14 @@ class FluxMotion extends StatefulWidget {
 class _FluxMotionState extends State<FluxMotion> with TickerProviderStateMixin {
   late MotionEngine _engine;
   bool _started = false;
+  bool _scrollScheduled = false;
   bool _visibilityScheduled = false;
 
   @override
   void initState() {
     super.initState();
     _engine = widget.engineFactory();
+    _attachController(widget.controller);
   }
 
   @override
@@ -51,12 +65,18 @@ class _FluxMotionState extends State<FluxMotion> with TickerProviderStateMixin {
   @override
   void didUpdateWidget(FluxMotion oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller?.detach(this);
+      _attachController(widget.controller);
+    }
+
     if (oldWidget.effects != widget.effects ||
         oldWidget.trigger != widget.trigger ||
         oldWidget.engineFactory != widget.engineFactory) {
       _engine.dispose();
       _engine = widget.engineFactory();
       _started = false;
+      _scrollScheduled = false;
       _visibilityScheduled = false;
       _rebindEngine();
       if (widget.trigger == MotionTrigger.onMount) {
@@ -83,6 +103,39 @@ class _FluxMotionState extends State<FluxMotion> with TickerProviderStateMixin {
     }
   }
 
+  void _attachController(FluxMotionController? controller) {
+    controller?.attach(
+      owner: this,
+      play: _handleControllerPlay,
+      stop: _handleControllerStop,
+      reset: _handleControllerReset,
+      replay: _handleControllerReplay,
+    );
+  }
+
+  void _handleControllerPlay() {
+    _start(widget.trigger);
+  }
+
+  void _handleControllerStop() {
+    _engine.stop();
+  }
+
+  void _handleControllerReset() {
+    _engine.reset();
+    _started = false;
+    _scrollScheduled = false;
+    _visibilityScheduled = false;
+  }
+
+  void _handleControllerReplay() {
+    _engine.reset();
+    _started = false;
+    _scrollScheduled = false;
+    _visibilityScheduled = false;
+    _start(widget.trigger);
+  }
+
   void _start(MotionTrigger trigger) {
     if (!mounted || widget.trigger != trigger) {
       return;
@@ -102,6 +155,22 @@ class _FluxMotionState extends State<FluxMotion> with TickerProviderStateMixin {
       if (mounted && widget.trigger == MotionTrigger.onVisibility) {
         _start(MotionTrigger.onVisibility);
       }
+    });
+  }
+
+  void _scheduleScrollStart() {
+    if (_scrollScheduled) {
+      return;
+    }
+
+    _scrollScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future<void>.delayed(Duration.zero, () {
+        _scrollScheduled = false;
+        if (mounted && widget.trigger == MotionTrigger.onScroll) {
+          _start(MotionTrigger.onScroll);
+        }
+      });
     });
   }
 
@@ -134,8 +203,10 @@ class _FluxMotionState extends State<FluxMotion> with TickerProviderStateMixin {
         );
       case MotionTrigger.onScroll:
         return NotificationListener<ScrollNotification>(
-          onNotification: (_) {
-            _start(MotionTrigger.onScroll);
+          onNotification: (notification) {
+            if (notification is ScrollStartNotification) {
+              _scheduleScrollStart();
+            }
             return false;
           },
           child: child,
@@ -148,6 +219,7 @@ class _FluxMotionState extends State<FluxMotion> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    widget.controller?.detach(this);
     _engine.dispose();
     super.dispose();
   }

@@ -1,18 +1,20 @@
 // The trigger is intentionally local because it also configures the generated
-// ScaleEffect before being forwarded to FluxMotion.
+// PulseEffect before being forwarded to FluxMotion.
 // ignore_for_file: use_super_parameters
 import '../../core/triggers/motion_trigger.dart';
 import '../../core/widgets/flux_motion.dart';
-import 'scale_effect.dart';
-import 'scale_spec.dart';
+import 'pulse_effect.dart';
+import 'pulse_preset.dart';
+import 'pulse_spec.dart';
 
-/// Ergonomic widget for applying a [ScaleEffect] to any child.
-class FluxScale extends FluxMotion {
-  FluxScale({
+/// Ergonomic widget for applying a [PulseEffect] to any child.
+final class FluxPulse extends FluxMotion {
+  /// Creates a pulse from one [spec] or a custom list of [effects].
+  FluxPulse({
     super.key,
     required super.child,
-    ScaleSpec? spec,
-    List<ScaleEffect>? effects,
+    PulseSpec? spec,
+    List<PulseEffect>? effects,
     MotionTrigger trigger = MotionTrigger.onMount,
     super.controller,
     super.engineFactory,
@@ -22,9 +24,9 @@ class FluxScale extends FluxMotion {
         ),
         super(
           effects: effects ??
-              <ScaleEffect>[
-                ScaleEffect(
-                  spec ?? const ScaleSpec(),
+              <PulseEffect>[
+                PulseEffect(
+                  spec ?? PulsePreset.emphasis(),
                   activation: trigger,
                 ),
               ],

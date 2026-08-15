@@ -8,7 +8,7 @@ import 'package:flutter_flux_motion/motions/fade/flux_fade.dart';
 
 void main() {
   group('FadeSpec', () {
-    test('provides the phase one defaults', () {
+    test('provides the mobile defaults', () {
       const spec = FadeSpec();
 
       expect(spec.begin, 0);
