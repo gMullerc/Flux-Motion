@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_flux_motion/flutter_flux_motion.dart';
+
+import '../showcase/mobile_showcase_page.dart';
 
 import 'blur_catalog.dart';
 import 'bottom_sheet_catalog.dart';
@@ -70,6 +73,15 @@ class _CatalogRendererState extends State<CatalogRenderer> {
 
   void _showOverview() => _select(_catalogOverviewId);
 
+  void _openMobileShowcase() {
+    Navigator.of(context).push<void>(
+      FluxPageRoute<void>(
+        spec: const FluxPageRouteSpec.fadeThrough(),
+        builder: (_) => const MobileShowcasePage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final compact = MediaQuery.sizeOf(context).width < 540;
@@ -90,6 +102,35 @@ class _CatalogRendererState extends State<CatalogRenderer> {
           onTap: _showOverview,
         ),
         actions: [
+          if (compact)
+            IconButton(
+              key: const ValueKey('open-mobile-showcase'),
+              tooltip: 'Open mobile showcase',
+              onPressed: _openMobileShowcase,
+              icon: const Icon(Icons.smartphone_rounded),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: FilledButton.icon(
+                key: const ValueKey('open-mobile-showcase'),
+                onPressed: _openMobileShowcase,
+                style: FilledButton.styleFrom(
+                  backgroundColor: CatalogColors.coral,
+                  foregroundColor: Colors.black,
+                ),
+                icon: const Icon(Icons.play_arrow_rounded, size: 18),
+                label: const Text(
+                  'MOBILE DEMO',
+                  style: TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: .8,
+                  ),
+                ),
+              ),
+            ),
           if (compact)
             IconButton(
               tooltip: 'Toggle reduced motion',
