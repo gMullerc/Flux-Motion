@@ -43,6 +43,12 @@ Engine (abstrata)
 Timeline de grupo
   └── FluxStagger + StaggerSpec
         └── janelas de fade/offset por child
+
+Navegação
+  ├── FluxPageRoute + FluxPageRouteSpec
+  ├── showFluxDialog + FluxDialogSpec
+  └── showFluxBottomSheet + FluxBottomSheetSpec
+        └── controllers pertencem ao Navigator/Material
 ```
 
 ### Fluxo em runtime
@@ -284,6 +290,20 @@ de alto nível — `play`, `stop`, `reset` e `replay` — e não entrega um
 O componente mantém a responsabilidade de conectar e desconectar o controller
 durante seu lifecycle. Assim, uma mesma intenção de produto pode iniciar uma
 sequence ou um stagger sem assumir ticker, listener ou `dispose`.
+
+### Navegação mobile
+
+Transições de rota não passam pela `MotionEngine`: o `Navigator` já mantém a
+timeline primária e a secundária necessárias para coordenar a tela que entra e
+a tela que sai. `FluxPageRoute` apenas traduz essas timelines em motion visual.
+
+Dialogs usam `showGeneralDialog` para preservar barreira, foco e resultado.
+Bottom sheets delegam a `showModalBottomSheet`, mantendo drag, safe area e
+comportamento Material. Nenhuma API pública transfere a propriedade de um
+`AnimationController` para o consumidor.
+
+Essa separação evita tickers duplicados e mantém as regras de lifecycle do
+Flutter como fonte de verdade para navegação.
 
 ---
 

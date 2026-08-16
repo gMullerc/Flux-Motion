@@ -66,16 +66,17 @@ class _CatalogComponentPageState extends State<CatalogComponentPage> {
               _ParameterTable(entry: entry),
               const SizedBox(height: 42),
               _CatalogSectionHeader(
-                eyebrow: 'TRIGGERS',
-                title: 'Activation',
-                subtitle:
+                eyebrow: entry.activation?.eyebrow ?? 'TRIGGERS',
+                title: entry.activation?.title ?? 'Activation',
+                subtitle: entry.activation?.subtitle ??
                     'Every activation mode supported by the motion engine.',
                 color: entry.color,
               ),
               const SizedBox(height: 16),
               KeyedSubtree(
                 key: ValueKey('${entry.id}-triggers-$_replayKey'),
-                child: _TriggerGallery(entry: entry),
+                child: entry.activation?.builder(entry.color) ??
+                    _TriggerGallery(entry: entry),
               ),
               const SizedBox(height: 42),
               _CatalogSectionHeader(
@@ -87,19 +88,35 @@ class _CatalogComponentPageState extends State<CatalogComponentPage> {
               ),
               const SizedBox(height: 16),
               _ScenarioGallery(entry: entry),
-              const SizedBox(height: 42),
-              _CatalogSectionHeader(
-                eyebrow: 'COMPOSITION',
-                title: 'Combine motions',
-                subtitle:
-                    'A composed example that preserves the intent of each primitive.',
-                color: entry.color,
-              ),
-              const SizedBox(height: 16),
-              KeyedSubtree(
-                key: ValueKey('${entry.id}-composition-$_replayKey'),
-                child: _CompositionPanel(entry: entry),
-              ),
+              for (final section in entry.documentationSections) ...[
+                const SizedBox(height: 42),
+                _CatalogSectionHeader(
+                  eyebrow: section.eyebrow,
+                  title: section.title,
+                  subtitle: section.subtitle,
+                  color: entry.color,
+                ),
+                const SizedBox(height: 16),
+                _DocumentationGallery(
+                  section: section,
+                  color: entry.color,
+                ),
+              ],
+              if (entry.compositionBuilder != null) ...[
+                const SizedBox(height: 42),
+                _CatalogSectionHeader(
+                  eyebrow: 'COMPOSITION',
+                  title: 'Combine motions',
+                  subtitle:
+                      'A composed example that preserves the intent of each primitive.',
+                  color: entry.color,
+                ),
+                const SizedBox(height: 16),
+                KeyedSubtree(
+                  key: ValueKey('${entry.id}-composition-$_replayKey'),
+                  child: _CompositionPanel(entry: entry),
+                ),
+              ],
               const SizedBox(height: 42),
               _CatalogSectionHeader(
                 eyebrow: 'DART API',
@@ -160,7 +177,7 @@ class _CatalogHero extends StatelessWidget {
               ),
               const SizedBox(height: 18),
               Text(
-                entry.name,
+                _softWrapApiName(entry.name),
                 style: Theme.of(context).textTheme.displaySmall?.copyWith(
                       color: CatalogColors.text,
                       fontWeight: FontWeight.w900,
@@ -248,6 +265,13 @@ class _CatalogHero extends StatelessWidget {
       ),
     );
   }
+}
+
+String _softWrapApiName(String value) {
+  return value.replaceAllMapped(
+    RegExp(r'([a-z])([A-Z])'),
+    (match) => '${match.group(1)}\u200B${match.group(2)}',
+  );
 }
 
 class _HeroSurface extends StatelessWidget {
@@ -367,10 +391,11 @@ class _ExampleCard extends StatelessWidget {
                   ),
                 ),
               ),
-              _CatalogTag(
-                label: example.trigger.name,
-                color: entry.color,
-              ),
+              if (example.badge != null || example.trigger != null)
+                _CatalogTag(
+                  label: example.badge ?? example.trigger!.name,
+                  color: entry.color,
+                ),
             ],
           ),
           const SizedBox(height: 12),
@@ -382,7 +407,8 @@ class _ExampleCard extends StatelessWidget {
               color: CatalogColors.canvas,
               borderRadius: BorderRadius.circular(15),
             ),
-            child: example.builder(example.trigger, sample),
+            child: example.previewBuilder?.call(sample) ??
+                example.builder!(example.trigger!, sample),
           ),
           const SizedBox(height: 12),
           Text(
@@ -743,6 +769,86 @@ class _ScenarioGallery extends StatelessWidget {
   }
 }
 
+class _DocumentationGallery extends StatelessWidget {
+  const _DocumentationGallery({
+    required this.section,
+    required this.color,
+  });
+
+  final CatalogDocumentationSection section;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final tileWidth = width >= 900
+            ? (width - 24) / 3
+            : width >= 620
+                ? (width - 12) / 2
+                : width;
+
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            for (final item in section.items)
+              SizedBox(
+                width: tileWidth,
+                child: _CatalogPanel(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 34,
+                            height: 34,
+                            decoration: BoxDecoration(
+                              color: color.withAlpha(18),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: color.withAlpha(75)),
+                            ),
+                            child: Icon(item.icon, color: color, size: 18),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              item.title,
+                              style: const TextStyle(
+                                color: CatalogColors.text,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        item.description,
+                        style: const TextStyle(
+                          color: CatalogColors.muted,
+                          fontSize: 12,
+                          height: 1.45,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _CatalogTag(label: item.label, color: color),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
 class _CompositionPanel extends StatelessWidget {
   const _CompositionPanel({required this.entry});
 
@@ -750,7 +856,7 @@ class _CompositionPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final preview = entry.compositionBuilder(
+    final preview = entry.compositionBuilder!(
       Container(
         width: 220,
         height: 110,
@@ -765,7 +871,7 @@ class _CompositionPanel extends StatelessWidget {
             Icon(entry.icon, color: entry.color, size: 32),
             const SizedBox(width: 12),
             Text(
-              entry.compositionLabel.replaceAll(' + ', '\n+ '),
+              entry.compositionLabel!.replaceAll(' + ', '\n+ '),
               style: const TextStyle(
                 color: CatalogColors.text,
                 fontFamily: 'monospace',
@@ -787,7 +893,7 @@ class _CompositionPanel extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _CatalogTag(
-                label: entry.compositionLabel,
+                label: entry.compositionLabel!,
                 color: entry.color,
               ),
               const SizedBox(height: 14),

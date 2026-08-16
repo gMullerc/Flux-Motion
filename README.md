@@ -32,10 +32,32 @@ FluxSlide(
 | `FluxSequence` | Timeline declarativa de effects executados em ordem |
 | `FluxStagger` | Entrada coordenada de grupos com intervalo entre itens |
 
-Todos os componentes respeitam `MediaQuery.disableAnimations` e compartilham o
+### Navegação mobile
+
+| API | Responsabilidade |
+| --- | --- |
+| `FluxPageRoute` | Push e pop de páginas com slide, fade, scale, fade-through ou shared-axis |
+| `showFluxDialog` | Apresentação de dialogs com motion e retorno tipado |
+| `showFluxBottomSheet` | Bottom sheets Material com ritmo, gesto e acessibilidade consistentes |
+
+```dart
+final result = await Navigator.of(context).push<String>(
+  FluxPageRoute(
+    spec: const FluxPageRouteSpec.sharedAxis(),
+    builder: (_) => const CheckoutPage(),
+  ),
+);
+```
+
+Os motions de widget respeitam `MediaQuery.disableAnimations` e compartilham o
 mesmo contrato de ativação por `onMount`, `onTap`, `onTapDown`, `onTapUp`,
 `onHover`, `onScroll` ou `onVisibility`. Motions de um único widget usam a
 engine comum; orquestradores coordenam a timeline sem expor tickers.
+
+As APIs de navegação usam o controller mantido pelo próprio `Navigator` ou
+componente Material. Assim, push, pop, barreiras, gestos e resultados continuam
+seguindo o lifecycle nativo do Flutter. Todas também respeitam
+`MediaQuery.disableAnimations`.
 
 Os componentes `Flux*` aceitam um `FluxMotionController` para controle
 imperativo com `play()`, `stop()`, `reset()` e `replay()`. Isso permite

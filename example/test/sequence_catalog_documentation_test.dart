@@ -62,8 +62,8 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: example.builder(
-              example.trigger,
+            child: example.builder!(
+              example.trigger!,
               const SizedBox(
                 key: ValueKey('confirmation-target'),
                 width: 80,
@@ -113,8 +113,8 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Center(
-            child: example.builder(
-              example.trigger,
+            child: example.builder!(
+              example.trigger!,
               const SizedBox.shrink(),
             ),
           ),
