@@ -5,6 +5,7 @@ import 'bottom_sheet_catalog.dart';
 import 'bounce_catalog.dart';
 import 'catalog_component_page.dart';
 import 'catalog_entry.dart';
+import 'catalog_landing_page.dart';
 import 'catalog_theme.dart';
 import 'dialog_catalog.dart';
 import 'fade_catalog.dart';
@@ -38,6 +39,8 @@ final motionCatalogs = <MotionCatalogEntry>[
   bottomSheetCatalog,
 ];
 
+const _catalogOverviewId = 'overview';
+
 class CatalogRenderer extends StatefulWidget {
   const CatalogRenderer({super.key});
 
@@ -47,10 +50,13 @@ class CatalogRenderer extends StatefulWidget {
 
 class _CatalogRendererState extends State<CatalogRenderer> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  String _selectedId = motionCatalogs.first.id;
+  String _selectedId = _catalogOverviewId;
   bool _reducedMotion = false;
 
-  MotionCatalogEntry get _selectedEntry {
+  MotionCatalogEntry? get _selectedEntry {
+    if (_selectedId == _catalogOverviewId) {
+      return null;
+    }
     return motionCatalogs.firstWhere((entry) => entry.id == _selectedId);
   }
 
@@ -62,6 +68,8 @@ class _CatalogRendererState extends State<CatalogRenderer> {
     setState(() => _selectedId = id);
   }
 
+  void _showOverview() => _select(_catalogOverviewId);
+
   @override
   Widget build(BuildContext context) {
     final compact = MediaQuery.sizeOf(context).width < 540;
@@ -71,12 +79,16 @@ class _CatalogRendererState extends State<CatalogRenderer> {
       drawer: _CatalogDrawer(
         entries: motionCatalogs,
         selectedId: _selectedId,
+        onOverview: _showOverview,
         onSelect: _select,
       ),
       appBar: AppBar(
         backgroundColor: CatalogColors.canvas,
         titleSpacing: compact ? 8 : 22,
-        title: _CatalogBrand(compact: compact),
+        title: _CatalogBrand(
+          compact: compact,
+          onTap: _showOverview,
+        ),
         actions: [
           if (compact)
             IconButton(
@@ -119,10 +131,15 @@ class _CatalogRendererState extends State<CatalogRenderer> {
           duration: const Duration(milliseconds: 300),
           switchInCurve: Curves.easeOutCubic,
           switchOutCurve: Curves.easeInCubic,
-          child: CatalogComponentPage(
-            key: ValueKey('catalog-page-${_selectedEntry.id}'),
-            entry: _selectedEntry,
-          ),
+          child: _selectedEntry == null
+              ? CatalogLandingPage(
+                  key: const ValueKey('catalog-landing-page'),
+                  entries: motionCatalogs,
+                )
+              : CatalogComponentPage(
+                  key: ValueKey('catalog-page-${_selectedEntry!.id}'),
+                  entry: _selectedEntry!,
+                ),
         ),
       ),
     );
@@ -133,11 +150,13 @@ class _CatalogDrawer extends StatelessWidget {
   const _CatalogDrawer({
     required this.entries,
     required this.selectedId,
+    required this.onOverview,
     required this.onSelect,
   });
 
   final List<MotionCatalogEntry> entries;
   final String selectedId;
+  final VoidCallback onOverview;
   final ValueChanged<String> onSelect;
 
   @override
@@ -148,8 +167,13 @@ class _CatalogDrawer extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
           children: [
-            const _CatalogBrand(),
+            _CatalogBrand(onTap: onOverview),
             const SizedBox(height: 32),
+            _CatalogOverviewItem(
+              active: selectedId == _catalogOverviewId,
+              onTap: onOverview,
+            ),
+            const SizedBox(height: 28),
             const Text(
               'PUBLIC COMPONENTS',
               style: TextStyle(
@@ -202,6 +226,86 @@ class _CatalogDrawer extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CatalogOverviewItem extends StatelessWidget {
+  const _CatalogOverviewItem({
+    required this.active,
+    required this.onTap,
+  });
+
+  final bool active;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: active ? CatalogColors.coral.withAlpha(22) : CatalogColors.panel,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        key: const ValueKey('catalog-overview'),
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: active
+                  ? CatalogColors.coral.withAlpha(175)
+                  : CatalogColors.line,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: CatalogColors.coral.withAlpha(18),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.home_rounded,
+                  color: CatalogColors.coral,
+                  size: 19,
+                ),
+              ),
+              const SizedBox(width: 11),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Overview',
+                      style: TextStyle(
+                        color: CatalogColors.text,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    SizedBox(height: 3),
+                    Text(
+                      'Library introduction',
+                      style: TextStyle(
+                        color: CatalogColors.muted,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: CatalogColors.coral,
+                size: 18,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -285,48 +389,51 @@ class _CatalogDrawerItem extends StatelessWidget {
 }
 
 class _CatalogBrand extends StatelessWidget {
-  const _CatalogBrand({this.compact = false});
+  const _CatalogBrand({this.compact = false, this.onTap});
 
   final bool compact;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 29,
-          height: 29,
-          decoration: BoxDecoration(
-            color: CatalogColors.coral,
-            borderRadius: BorderRadius.circular(8),
+    return Semantics(
+      button: onTap != null,
+      label: 'Flux Motion catalog overview',
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 3),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: compact ? 30 : 36,
+                height: compact ? 30 : 36,
+                decoration: BoxDecoration(
+                  color: CatalogColors.coral,
+                  borderRadius: BorderRadius.circular(compact ? 8 : 9),
+                ),
+                child: Icon(
+                  Icons.bolt_rounded,
+                  color: Colors.black,
+                  size: compact ? 18 : 21,
+                ),
+              ),
+              SizedBox(width: compact ? 9 : 12),
+              Text(
+                compact ? 'FLUX' : 'FLUX MOTION',
+                style: const TextStyle(
+                  color: CatalogColors.text,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.05,
+                ),
+              ),
+            ],
           ),
-          child: const Icon(Icons.bolt_rounded, color: Colors.black, size: 18),
         ),
-        const SizedBox(width: 10),
-        Text(
-          compact ? 'FLUX' : 'FLUX MOTION',
-          style: const TextStyle(
-            color: CatalogColors.text,
-            fontSize: 13,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 1.7,
-          ),
-        ),
-        if (!compact) ...[
-          const SizedBox(width: 8),
-          const Text(
-            'DOCS',
-            style: TextStyle(
-              color: CatalogColors.coral,
-              fontFamily: 'monospace',
-              fontSize: 10,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.2,
-            ),
-          ),
-        ],
-      ],
+      ),
     );
   }
 }
