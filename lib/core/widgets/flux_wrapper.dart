@@ -2,7 +2,8 @@ import 'package:flutter/widgets.dart';
 
 import '../effects/motion_render.dart';
 
-/// Applies an ordered list of [MotionRender] layers over [child] via [fold].
+/// Applies an ordered list of [MotionRender] layers over [child] by folding the
+/// render pipeline in order.
 class FluxWrapper extends StatelessWidget {
   const FluxWrapper({
     super.key,

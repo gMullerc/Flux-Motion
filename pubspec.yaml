@@ -1,8 +1,30 @@
 name: flutter_flux_motion
-description: Declarative mobile-first motion components for any Flutter widget.
-publish_to: 'none'
+description: Declarative, mobile-first motion widgets, orchestration, and navigation transitions for Flutter.
 
 version: 0.1.0
+
+homepage: https://gmullerc.github.io/Flux-Motion/
+repository: https://github.com/gMullerc/Flux-Motion
+issue_tracker: https://github.com/gMullerc/Flux-Motion/issues
+
+topics:
+  - animation
+  - motion
+  - flutter-ui
+  - transitions
+  - navigation
+
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:
+
+screenshots:
+  - description: Flux Motion interactive catalog
+    path: example/web/fluxmotions-thumbnail.png
 
 environment:
   sdk: ^3.5.0

@@ -33,6 +33,7 @@ migrate_working_dir/
 /build/
 **/build/
 **/coverage/
+/pubspec.lock
 
 # Flutter generated local configuration
 **/android/local.properties

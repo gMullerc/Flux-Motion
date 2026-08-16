@@ -1,3 +1,5 @@
+/// Declarative, mobile-first motion widgets, orchestration, and navigation
+/// transitions for Flutter.
 library flutter_flux_motion;
 
 export 'core/controllers/flux_motion_controller.dart';

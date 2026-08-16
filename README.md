@@ -1,44 +1,104 @@
 # Flux Motion
 
-Biblioteca Flutter para aplicar motion declarativo a qualquer widget sem
-espalhar `AnimationController`, listeners e lógica de lifecycle pela aplicação.
+[![pub package](https://img.shields.io/pub/v/flutter_flux_motion.svg)](https://pub.dev/packages/flutter_flux_motion)
+[![license: BSD-3-Clause](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](LICENSE)
+
+Declarative, mobile-first motion for Flutter. Apply polished animation to any
+widget without spreading `AnimationController`, listeners, and lifecycle logic
+through your application.
+
+[![Flux Motion catalog](https://raw.githubusercontent.com/gMullerc/Flux-Motion/main/example/web/fluxmotions-thumbnail.png)](https://gmullerc.github.io/Flux-Motion/)
+
+## Install
+
+```console
+flutter pub add flutter_flux_motion
+```
 
 ```dart
 import 'package:flutter_flux_motion/flutter_flux_motion.dart';
+```
 
+## Quick start
+
+Every motion wraps an ordinary Flutter widget. Configure its behavior with an
+immutable spec and choose when it starts with `MotionTrigger`.
+
+```dart
 FluxSlide(
+  trigger: MotionTrigger.onMount,
   spec: const SlideSpec(
     begin: Offset(0, 24),
     duration: Duration(milliseconds: 480),
+    curve: Curves.easeOutCubic,
   ),
-  child: const ResultCard(),
+  child: const Card(
+    child: Padding(
+      padding: EdgeInsets.all(16),
+      child: Text('Ready to move'),
+    ),
+  ),
 )
 ```
 
-## Componentes disponíveis
+## Interaction and imperative playback
 
-| Componente | Responsabilidade |
-| --- | --- |
-| `FluxFade` | Transições de opacidade |
-| `FluxSlide` | Movimento entre offsets em pixels lógicos |
-| `FluxScale` | Ênfase, entrada e resposta ao toque |
-| `FluxRotate` | Rotação em graus mantendo o widget no lugar |
-| `FluxBlur` | Transições entre foco suave e nítido |
-| `FluxGlow` | Halo animado ao redor do widget completo |
-| `FluxShimmer` | Faixa de luz animada para loading e destaque |
-| `FluxShake` | Feedback corretivo por oscilação horizontal ou vertical |
-| `FluxPulse` | Ênfase e status por pulsação de escala |
-| `FluxBounce` | Feedback expressivo com deslocamento e acomodação |
-| `FluxSequence` | Timeline declarativa de effects executados em ordem |
-| `FluxStagger` | Entrada coordenada de grupos com intervalo entre itens |
+Motions can start on mount, tap, tap down, tap up, hover, scroll, or visibility.
 
-### Navegação mobile
+```dart
+FluxGlow(
+  trigger: MotionTrigger.onTap,
+  spec: const GlowSpec(
+    color: Color(0xFF8B5CF6),
+    radius: 24,
+    spreadRadius: 3,
+  ),
+  child: const Icon(Icons.favorite, size: 44),
+)
+```
 
-| API | Responsabilidade |
-| --- | --- |
-| `FluxPageRoute` | Push e pop de páginas com slide, fade, scale, fade-through ou shared-axis |
-| `showFluxDialog` | Apresentação de dialogs com motion e retorno tipado |
-| `showFluxBottomSheet` | Bottom sheets Material com ritmo, gesto e acessibilidade consistentes |
+Use `FluxMotionController` when product state, validation, or an asynchronous
+result should control playback.
+
+```dart
+final motion = FluxMotionController();
+
+FluxShake(
+  controller: motion,
+  child: const TextField(),
+)
+
+// For example, after invalid form submission:
+motion.replay();
+```
+
+The controller exposes `play()`, `stop()`, `reset()`, and `replay()` and attaches
+to one motion widget at a time.
+
+## Orchestration
+
+Use `FluxSequence` for ordered effects and `FluxStagger` for coordinated lists
+or groups. Both own their timeline and support the same interaction triggers and
+imperative controller.
+
+```dart
+FluxStagger(
+  spec: const StaggerSpec(
+    interval: Duration(milliseconds: 70),
+    beginOffset: Offset(0, 18),
+  ),
+  children: const [
+    ListTile(title: Text('Profile')),
+    ListTile(title: Text('Notifications')),
+    ListTile(title: Text('Security')),
+  ],
+)
+```
+
+## Navigation motion
+
+Flux Motion integrates with Flutter's native navigator, dialogs, and Material
+bottom sheets.
 
 ```dart
 final result = await Navigator.of(context).push<String>(
@@ -49,49 +109,48 @@ final result = await Navigator.of(context).push<String>(
 );
 ```
 
-Os motions de widget respeitam `MediaQuery.disableAnimations` e compartilham o
-mesmo contrato de ativação por `onMount`, `onTap`, `onTapDown`, `onTapUp`,
-`onHover`, `onScroll` ou `onVisibility`. Motions de um único widget usam a
-engine comum; orquestradores coordenam a timeline sem expor tickers.
+Use `showFluxDialog` and `showFluxBottomSheet` for typed results, native
+barriers and gestures, and consistent transition timing.
 
-As APIs de navegação usam o controller mantido pelo próprio `Navigator` ou
-componente Material. Assim, push, pop, barreiras, gestos e resultados continuam
-seguindo o lifecycle nativo do Flutter. Todas também respeitam
+## Available APIs
+
+| Category | APIs |
+| --- | --- |
+| Essential motion | `FluxFade`, `FluxSlide`, `FluxScale`, `FluxRotate`, `FluxBlur` |
+| Feedback and emphasis | `FluxGlow`, `FluxShimmer`, `FluxShake`, `FluxPulse`, `FluxBounce` |
+| Orchestration | `FluxSequence`, `FluxStagger` |
+| Navigation | `FluxPageRoute`, `showFluxDialog`, `showFluxBottomSheet` |
+| Control | `MotionTrigger`, `FluxMotionController`, `FluxMotion` |
+
+All widget and navigation motions honor Flutter's reduced-motion setting via
 `MediaQuery.disableAnimations`.
 
-Os componentes `Flux*` aceitam um `FluxMotionController` para controle
-imperativo com `play()`, `stop()`, `reset()` e `replay()`. Isso permite
-coordenar motions e timelines com o estado do produto sem expor
-`AnimationController` ao aplicativo.
+## Interactive catalog
 
-## Catálogo visual
+The [Flux Motion catalog](https://gmullerc.github.io/Flux-Motion/) documents each
+public component with live examples, parameters, activation modes, mobile
+scenarios, composition guidance, and copy-ready Dart code.
 
-O projeto em `example/` funciona como documentação interativa. Cada motion
-possui uma página própria com:
+To run the catalog locally:
 
-- exemplos animados;
-- parâmetros, tipos e valores padrão;
-- formas de ativação;
-- cenários de uso mobile;
-- composição com outros motions;
-- código Dart pronto para copiar.
-
-Para executar:
-
-```text
+```console
 cd example
 flutter run -d chrome
 ```
 
-## Desenvolvimento
+## Development
 
-```text
+```console
 flutter pub get
-flutter test
 flutter analyze
+flutter test
 ```
 
-Veja [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) para os contratos da engine,
-[docs/OVERVIEW.md](docs/OVERVIEW.md) para uma visão geral da biblioteca e
-[docs/TESTING.md](docs/TESTING.md) para os critérios obrigatórios de testes por
-cenários reais de widget.
+Architecture and testing principles live in the
+[`docs/` directory](https://github.com/gMullerc/Flux-Motion/tree/main/docs).
+Contributions and real-world motion scenarios are welcome through the
+[issue tracker](https://github.com/gMullerc/Flux-Motion/issues).
+
+## License
+
+Flux Motion is available under the [BSD 3-Clause License](LICENSE).
