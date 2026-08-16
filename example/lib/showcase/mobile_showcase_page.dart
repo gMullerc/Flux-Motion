@@ -191,7 +191,7 @@ class _ShowcaseTopBar extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'FIELD NOTES',
+                'DOCE ROTA',
                 style: TextStyle(
                   color: _ink,
                   fontFamily: 'monospace',
@@ -202,7 +202,7 @@ class _ShowcaseTopBar extends StatelessWidget {
               ),
               SizedBox(height: 2),
               Text(
-                'São Paulo · Saturday 04',
+                'São Paulo · Fornada 04',
                 style: TextStyle(
                   color: _mutedInk,
                   fontSize: 11,
@@ -234,7 +234,7 @@ class _ShowcaseTopBar extends StatelessWidget {
                 const Icon(Icons.favorite_rounded, color: _coral, size: 15),
                 const SizedBox(width: 7),
                 Text(
-                  '$favoriteCount SAVED',
+                  '$favoriteCount SALVOS',
                   key: const ValueKey('mobile-favorite-count-label'),
                   style: const TextStyle(
                     color: _paper,
@@ -267,7 +267,7 @@ class _EditorialHero extends StatelessWidget {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 10),
               child: Text(
-                'A CURATED CITY EDIT',
+                'ROSQUINHAS EM MOVIMENTO',
                 style: TextStyle(
                   color: _ink,
                   fontFamily: 'monospace',
@@ -282,7 +282,7 @@ class _EditorialHero extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         const Text(
-          'Your Saturday,\nalready in motion.',
+          'Seu sábado já está\nem movimento.',
           style: TextStyle(
             color: _ink,
             fontFamily: 'serif',
@@ -307,7 +307,7 @@ class _EditorialHero extends StatelessWidget {
             const SizedBox(width: 13),
             const Expanded(
               child: Text(
-                'Four places worth leaving the house for. Save what feels right, then let Flux build the route.',
+                'Quatro rosquinhas para provar sem pressa. Favorite seus sabores e deixe o Flux montar a caixa.',
                 style: TextStyle(
                   color: _mutedInk,
                   fontSize: 14,
@@ -328,16 +328,24 @@ class _DayFilter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        _FilterChip(label: 'ALL', selected: true),
-        SizedBox(width: 8),
-        _FilterChip(label: 'AM'),
-        SizedBox(width: 8),
-        _FilterChip(label: 'PM'),
-        Spacer(),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _FilterChip(label: 'TODAS', selected: true),
+              _FilterChip(label: 'DOCES'),
+              _FilterChip(label: 'FRUTADAS'),
+            ],
+          ),
+        ),
+        SizedBox(height: 10),
         Text(
-          '04 STOPS',
+          '04 SABORES',
           style: TextStyle(
             color: _mutedInk,
             fontFamily: 'monospace',
@@ -398,6 +406,17 @@ class _ExperienceCard extends StatefulWidget {
 
 class _ExperienceCardState extends State<_ExperienceCard> {
   final FluxMotionController _favoriteController = FluxMotionController();
+  final List<PulseEffect> _favoriteEffects = <PulseEffect>[
+    PulseEffect(
+      const PulseSpec(
+        beginScale: 1,
+        peakScale: 1.1,
+        duration: Duration(milliseconds: 280),
+        curve: Curves.easeInOut,
+      ),
+      activation: MotionTrigger.onScroll,
+    ),
+  ];
   var _favorite = false;
 
   void _toggleFavorite() {
@@ -457,61 +476,49 @@ class _ExperienceCardState extends State<_ExperienceCard> {
                   ),
                 ),
                 Center(
-                  child: Transform.rotate(
-                    angle: experience.rotation,
-                    child: Container(
-                      width: 86,
-                      height: 86,
-                      decoration: BoxDecoration(
-                        color: _paperRaised.withAlpha(225),
-                        shape: experience.circular
-                            ? BoxShape.circle
-                            : BoxShape.rectangle,
-                        borderRadius: experience.circular
-                            ? null
-                            : BorderRadius.circular(22),
-                        border: Border.all(color: _ink, width: 1.3),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x3311110F),
-                            blurRadius: 0,
-                            offset: Offset(7, 8),
-                          ),
-                        ],
-                      ),
-                      child: Icon(experience.icon, color: _ink, size: 39),
-                    ),
+                  child: _DonutIllustration(
+                    icingColor: experience.icingColor,
+                    toppingColor: experience.toppingColor,
+                    rotation: experience.rotation,
                   ),
                 ),
                 Positioned(
                   right: 12,
                   top: 12,
-                  child: FluxScale(
+                  child: FluxPulse(
                     controller: _favoriteController,
-                    trigger: MotionTrigger.onTap,
-                    spec: const ScaleSpec(
-                      begin: .58,
-                      end: 1,
-                      duration: Duration(milliseconds: 430),
-                      curve: Curves.easeOutBack,
-                    ),
-                    child: IconButton.filled(
-                      key: ValueKey('showcase-favorite-${widget.index}'),
-                      tooltip: _favorite ? 'Remove favorite' : 'Save favorite',
-                      onPressed: _toggleFavorite,
-                      style: IconButton.styleFrom(
-                        backgroundColor: _paperRaised,
-                        foregroundColor: _ink,
-                        side: const BorderSide(color: _ink, width: 1.2),
+                    // O pulso parte apenas do IconButton.onPressed. Um gatilho
+                    // sem ponteiro evita uma segunda área de toque no wrapper.
+                    trigger: MotionTrigger.onScroll,
+                    effects: _favoriteEffects,
+                    child: SizedBox.square(
+                      key: ValueKey(
+                        'showcase-favorite-pulse-child-${widget.index}',
                       ),
-                      icon: Icon(
-                        _favorite
-                            ? Icons.favorite_rounded
-                            : Icons.favorite_border_rounded,
-                        key: ValueKey(
-                          'showcase-favorite-icon-${widget.index}-$_favorite',
+                      dimension: 58,
+                      child: IconButton.filled(
+                        key: ValueKey('showcase-favorite-${widget.index}'),
+                        tooltip: _favorite
+                            ? 'Remover dos favoritos'
+                            : 'Salvar como favorito',
+                        onPressed: _toggleFavorite,
+                        iconSize: 27,
+                        padding: EdgeInsets.zero,
+                        style: IconButton.styleFrom(
+                          fixedSize: const Size.square(58),
+                          backgroundColor: _paperRaised,
+                          foregroundColor: _ink,
+                          side: const BorderSide(color: _ink, width: 1.4),
                         ),
-                        color: _favorite ? _coral : _ink,
+                        icon: Icon(
+                          _favorite
+                              ? Icons.favorite_rounded
+                              : Icons.favorite_border_rounded,
+                          key: ValueKey(
+                            'showcase-favorite-icon-${widget.index}-$_favorite',
+                          ),
+                          color: _favorite ? _coral : _ink,
+                        ),
                       ),
                     ),
                   ),
@@ -631,7 +638,7 @@ class _EndNote extends StatelessWidget {
           SizedBox(width: 14),
           Expanded(
             child: Text(
-              'You made it.\nYour route is ready.',
+              'Você chegou ao fim.\nSua caixa está pronta.',
               style: TextStyle(
                 color: _paper,
                 fontFamily: 'serif',
@@ -642,7 +649,7 @@ class _EndNote extends StatelessWidget {
             ),
           ),
           Text(
-            'KEEP\nGOING',
+            'MAIS UM\nPASSO',
             textAlign: TextAlign.right,
             style: TextStyle(
               color: _coral,
@@ -710,7 +717,7 @@ class _RouteReadySheetState extends State<_RouteReadySheet> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'ROUTE READY / 04 STOPS',
+                              'CAIXA PRONTA / 04 SABORES',
                               style: TextStyle(
                                 color: _coral,
                                 fontFamily: 'monospace',
@@ -721,7 +728,7 @@ class _RouteReadySheetState extends State<_RouteReadySheet> {
                             ),
                             SizedBox(height: 8),
                             Text(
-                              'Make a day of it.',
+                              'Leve a fornada.',
                               style: TextStyle(
                                 color: _ink,
                                 fontFamily: 'serif',
@@ -768,7 +775,7 @@ class _RouteReadySheetState extends State<_RouteReadySheet> {
                         icon: const Icon(Icons.auto_awesome_rounded,
                             color: _acid),
                         label: const Text(
-                          'BUILD MY SATURDAY',
+                          'MONTAR MINHA CAIXA',
                           style: TextStyle(
                             fontFamily: 'monospace',
                             fontSize: 11,
@@ -818,11 +825,11 @@ class _RouteSummary extends StatelessWidget {
       ),
       child: const Row(
         children: [
-          _RouteMetric(value: '7.2 KM', label: 'DISTANCE'),
+          _RouteMetric(value: '04', label: 'SABORES'),
           _RouteDivider(),
-          _RouteMetric(value: '05 HRS', label: 'DURATION'),
+          _RouteMetric(value: '12', label: 'UNIDADES'),
           _RouteDivider(),
-          _RouteMetric(value: '4', label: 'PLACES'),
+          _RouteMetric(value: '35 MIN', label: 'ENTREGA'),
         ],
       ),
     );
@@ -899,7 +906,7 @@ class _RouteSuccess extends StatelessWidget {
           ),
           const SizedBox(height: 18),
           const Text(
-            'Route saved.',
+            'Pedido montado.',
             style: TextStyle(
               color: _ink,
               fontFamily: 'serif',
@@ -910,7 +917,7 @@ class _RouteSuccess extends StatelessWidget {
           ),
           const SizedBox(height: 7),
           const Text(
-            'A little motion, right when it matters.',
+            'Um pouco de motion, bem quando importa.',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: _mutedInk,
@@ -930,7 +937,7 @@ class _RouteSuccess extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 15),
               ),
               child: const Text(
-                'DONE',
+                'CONCLUIR',
                 style: TextStyle(
                   fontFamily: 'monospace',
                   fontWeight: FontWeight.w900,
@@ -945,6 +952,128 @@ class _RouteSuccess extends StatelessWidget {
   }
 }
 
+class _DonutIllustration extends StatelessWidget {
+  const _DonutIllustration({
+    required this.icingColor,
+    required this.toppingColor,
+    required this.rotation,
+  });
+
+  final Color icingColor;
+  final Color toppingColor;
+  final double rotation;
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform.rotate(
+      angle: rotation,
+      child: SizedBox.square(
+        dimension: 106,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Transform.translate(
+              offset: const Offset(7, 9),
+              child: Container(
+                width: 88,
+                height: 88,
+                decoration: const BoxDecoration(
+                  color: Color(0x4411110F),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+            Container(
+              width: 88,
+              height: 88,
+              decoration: BoxDecoration(
+                color: const Color(0xFFD69A5B),
+                shape: BoxShape.circle,
+                border: Border.all(color: _ink, width: 1.4),
+              ),
+            ),
+            Container(
+              width: 74,
+              height: 74,
+              decoration: BoxDecoration(
+                color: icingColor,
+                shape: BoxShape.circle,
+                border: Border.all(color: _ink.withAlpha(105), width: .8),
+              ),
+            ),
+            _Sprinkle(
+              top: 22,
+              left: 49,
+              color: toppingColor,
+              angle: .3,
+            ),
+            _Sprinkle(
+              top: 39,
+              left: 23,
+              color: toppingColor,
+              angle: 1.2,
+            ),
+            _Sprinkle(
+              top: 64,
+              left: 40,
+              color: toppingColor,
+              angle: -.35,
+            ),
+            _Sprinkle(
+              top: 52,
+              left: 70,
+              color: toppingColor,
+              angle: .8,
+            ),
+            Container(
+              width: 25,
+              height: 25,
+              decoration: BoxDecoration(
+                color: _paperRaised,
+                shape: BoxShape.circle,
+                border: Border.all(color: _ink, width: 1.2),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Sprinkle extends StatelessWidget {
+  const _Sprinkle({
+    required this.top,
+    required this.left,
+    required this.color,
+    required this.angle,
+  });
+
+  final double top;
+  final double left;
+  final Color color;
+  final double angle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: top,
+      left: left,
+      child: Transform.rotate(
+        angle: angle,
+        child: Container(
+          width: 5,
+          height: 11,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(99),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _Experience {
   const _Experience({
     required this.eyebrow,
@@ -954,9 +1083,9 @@ class _Experience {
     required this.distance,
     required this.color,
     required this.secondaryColor,
-    required this.icon,
+    required this.icingColor,
+    required this.toppingColor,
     this.rotation = 0,
-    this.circular = false,
   });
 
   final String eyebrow;
@@ -966,60 +1095,61 @@ class _Experience {
   final String distance;
   final Color color;
   final Color secondaryColor;
-  final IconData icon;
+  final Color icingColor;
+  final Color toppingColor;
   final double rotation;
-  final bool circular;
 }
 
 const _experiences = <_Experience>[
   _Experience(
-    eyebrow: 'COFFEE / PINHEIROS',
-    title: 'First light at Futuro',
-    description:
-        'Slow coffee, warm pão de queijo, and the quietest table by the window.',
-    time: '09:30 AM',
-    distance: '1.2 KM',
+    eyebrow: 'CLÁSSICA / BAUNILHA',
+    title: 'Baunilha tostada',
+    description: 'Massa macia, glacê de baunilha e açúcar queimado na medida.',
+    time: 'MAIS PEDIDA',
+    distance: 'R\$ 12',
     color: _coral,
     secondaryColor: Color(0xFFFFB067),
-    icon: Icons.coffee_rounded,
+    icingColor: Color(0xFFFFE8BD),
+    toppingColor: _coral,
     rotation: -.08,
   ),
   _Experience(
-    eyebrow: 'ART / JARDINS',
-    title: 'New forms, no rush',
+    eyebrow: 'INTENSA / CHOCOLATE',
+    title: 'Chocolate 70%',
     description:
-        'A compact exhibition of Brazilian objects, color, and impossible balance.',
-    time: '11:20 AM',
-    distance: '2.4 KM',
+        'Massa de cacau, cobertura amarga e pequenos cristais de caramelo.',
+    time: 'NOVA FORNADA',
+    distance: 'R\$ 14',
     color: _sky,
     secondaryColor: _lilac,
-    icon: Icons.architecture_rounded,
+    icingColor: Color(0xFF57362D),
+    toppingColor: _acid,
     rotation: .08,
-    circular: true,
   ),
   _Experience(
-    eyebrow: 'LUNCH / CENTRO',
-    title: 'Counter seat for one',
+    eyebrow: 'FRUTADA / LIMÃO',
+    title: 'Limão & pistache',
     description:
-        'Seasonal plates, natural wine, and a soundtrack worth asking about.',
-    time: '01:40 PM',
-    distance: '2.1 KM',
+        'Glacê cítrico, pistache torrado e uma massa leve que derrete na boca.',
+    time: 'EDIÇÃO DO MÊS',
+    distance: 'R\$ 15',
     color: _acid,
     secondaryColor: Color(0xFFFFD86F),
-    icon: Icons.restaurant_rounded,
+    icingColor: Color(0xFFDDF29A),
+    toppingColor: Color(0xFF477743),
     rotation: -.05,
   ),
   _Experience(
-    eyebrow: 'SUNSET / REPÚBLICA',
-    title: 'The city turns gold',
+    eyebrow: 'ESPECIAL / FRAMBOESA',
+    title: 'Framboesa brûlée',
     description:
-        'One rooftop, a wide horizon, and exactly enough time before the lights come on.',
-    time: '05:10 PM',
-    distance: '1.5 KM',
+        'Framboesa fresca, creme suave e uma casquinha fina de açúcar queimado.',
+    time: 'ÚLTIMAS',
+    distance: 'R\$ 16',
     color: _lilac,
     secondaryColor: _coral,
-    icon: Icons.wb_twilight_rounded,
+    icingColor: Color(0xFFFF89A9),
+    toppingColor: Color(0xFFFFE8BD),
     rotation: .06,
-    circular: true,
   ),
 ];

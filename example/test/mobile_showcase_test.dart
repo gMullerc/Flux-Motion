@@ -4,7 +4,7 @@ import 'package:flutter_flux_motion/flutter_flux_motion.dart';
 import 'package:flutter_flux_motion_example/main.dart';
 
 void main() {
-  testWidgets('mobile showcase follows the complete favorite and route journey',
+  testWidgets('vitrine mobile percorre favorito e montagem da caixa',
       (tester) async {
     final exceptions = <Object>[];
     tester.view.devicePixelRatio = 1;
@@ -20,16 +20,42 @@ void main() {
     _collectExceptions(tester, exceptions);
 
     expect(find.byKey(const ValueKey('mobile-showcase-page')), findsOneWidget);
-    expect(find.text('Your Saturday,\nalready in motion.'), findsOneWidget);
+    expect(find.text('Seu sábado já está\nem movimento.'), findsOneWidget);
     expect(find.byKey(const ValueKey('showcase-card-0')), findsOneWidget);
     expect(find.byKey(const ValueKey('showcase-card-3')), findsOneWidget);
-    expect(find.text('0 SAVED'), findsOneWidget);
+    expect(find.text('Baunilha tostada'), findsOneWidget);
+    expect(find.text('Chocolate 70%'), findsOneWidget);
+    expect(find.text('0 SALVOS'), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('showcase-favorite-0')));
+    final firstCard = find.byKey(const ValueKey('showcase-card-0'));
+    final firstFavorite = find.byKey(const ValueKey('showcase-favorite-0'));
+    final favoritePulse = find.ancestor(
+      of: firstFavorite,
+      matching: find.byType(FluxPulse),
+    );
+
+    expect(tester.getSize(firstFavorite), const Size.square(58));
+    expect(favoritePulse, findsOneWidget);
+
+    // Tocar no card, fora do ícone, não pode acionar o favorito.
+    await tester.tapAt(tester.getTopLeft(firstCard) + const Offset(24, 24));
+    await tester.pump(const Duration(milliseconds: 320));
+    expect(find.text('0 SALVOS'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('showcase-favorite-icon-0-false')),
+      findsOneWidget,
+    );
+
+    await tester.tap(firstFavorite);
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 220));
+    await tester.pump(const Duration(milliseconds: 140));
 
-    expect(find.text('1 SAVED'), findsOneWidget);
+    expect(_pulseScale(tester, 0), closeTo(1.1, .01));
+
+    await tester.pump(const Duration(milliseconds: 160));
+
+    expect(_pulseScale(tester, 0), closeTo(1, .01));
+    expect(find.text('1 SALVOS'), findsOneWidget);
     expect(
       find.byKey(const ValueKey('showcase-favorite-icon-0-true')),
       findsOneWidget,
@@ -53,13 +79,15 @@ void main() {
     await tester.pump(const Duration(milliseconds: 700));
     _collectExceptions(tester, exceptions);
 
-    expect(find.text('Route saved.'), findsOneWidget);
+    expect(find.text('Pedido montado.'), findsOneWidget);
     expect(
-        find.text('A little motion, right when it matters.'), findsOneWidget);
+      find.text('Um pouco de motion, bem quando importa.'),
+      findsOneWidget,
+    );
     expect(exceptions, isEmpty, reason: exceptions.join('\n\n'));
   });
 
-  testWidgets('mobile showcase remains overflow-free at 320px', (tester) async {
+  testWidgets('vitrine mobile permanece sem overflow em 320px', (tester) async {
     final exceptions = <Object>[];
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(320, 720);
@@ -81,6 +109,16 @@ void main() {
     expect(find.byKey(const ValueKey('showcase-route-sheet')), findsOneWidget);
     expect(exceptions, isEmpty, reason: exceptions.join('\n\n'));
   });
+}
+
+double _pulseScale(WidgetTester tester, int index) {
+  final childKey = ValueKey('showcase-favorite-pulse-child-$index');
+  final transform = find.byWidgetPredicate(
+    (widget) => widget is Transform && widget.child?.key == childKey,
+    description: 'transformação do pulso ao redor do favorito $index',
+  );
+  expect(transform, findsOneWidget);
+  return tester.widget<Transform>(transform).transform.storage[0];
 }
 
 Future<void> _scrollToEnd(WidgetTester tester) async {
