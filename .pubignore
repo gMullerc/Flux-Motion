@@ -13,12 +13,12 @@ analysis_options.yaml
 *.iml
 *.log
 pubspec.lock
-android/
-ios/
-linux/
-macos/
-web/
-windows/
+/android/
+/ios/
+/linux/
+/macos/
+/web/
+/windows/
 
 example/.dart_tool/
 example/.idea/
